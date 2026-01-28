@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Casino Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #1c1c1e; /* Темный фон как в iOS */
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .balance-container {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #ffd700; /* Золотой цвет */
+        }
+
+        .slot-machine {
+            display: flex;
+            gap: 10px;
+            background: #2c2c2e;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #3a3a3c;
+            margin-bottom: 40px;
+        }
+
+        .reel {
+            width: 60px;
+            height: 80px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #000;
+        }
+
+        #spin-btn {
+            background-color: #34c759; /* Зеленый цвет */
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+            width: 80%;
+        }
+
+        #spin-btn:active {
+            transform: scale(0.95);
+        }
+
+        #spin-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 15px;
+            height: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="balance-container">
+        Баланс: <span id="balance">1000</span> 💰
+    </div>
+
+    <div class="slot-machine">
+        <div class="reel" id="reel1">🍒</div>
+        <div class="reel" id="reel2">🍋</div>
+        <div class="reel" id="reel3">🍉</div>
+    </div>
+
+    <button id="spin-btn" onclick="spin()">КРУТИТЬ (50 💰)</button>
+    <div id="status">Удачи!</div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // На весь экран
+
+        // Настройки игры
+        const symbols = ['🍒', '🍋', '🍉', '🍇', '💎', '7️⃣'];
+        const spinCost = 50;
+        const winReward = 500;
+        
+        // Загружаем баланс из памяти телефона или ставим 1000
+        let balance = parseInt(localStorage.getItem('casino_balance')) || 1000;
+        updateBalanceUI();
+
+        const reel1 = document.getElementById('reel1');
+        const reel2 = document.getElementById('reel2');
+        const reel3 = document.getElementById('reel3');
+        const btn = document.getElementById('spin-btn');
+        const status = document.getElementById('status');
+
+        function updateBalanceUI() {
+            document.getElementById('balance').innerText = balance;
+            localStorage.setItem('casino_balance', balance); // Сохраняем
+        }
+
+        function spin() {
+            if (balance < spinCost) {
+                tg.showAlert("Недостаточно монет! Приходите завтра (или очистите кэш 😉)");
+                return;
+            }
+
+            // Списываем деньги
+            balance -= spinCost;
+            updateBalanceUI();
+            
+            // UI эффекты
+            btn.disabled = true;
+            status.innerText = "Крутим...";
+            tg.HapticFeedback.impactOccurred('light'); // Легкая вибрация при нажатии
+
+            // Анимация кручения (простая смена символов)
+            let spins = 0;
+            const interval = setInterval(() => {
+                reel1.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                reel2.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                reel3.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                spins++;
+                
+                // Останавливаем через 20 прокруток (примерно 2 секунды)
+                if (spins > 20) {
+                    clearInterval(interval);
+                    finalizeSpin();
+                }
+            }, 100);
+        }
+
+        function finalizeSpin() {
+            // Генерируем финальный результат
+            const r1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const r2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const r3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+            reel1.innerText = r1;
+            reel2.innerText = r2;
+            reel3.innerText = r3;
+
+            btn.disabled = false;
+
+            // Проверка на победу (3 одинаковых)
+            if (r1 === r2 && r2 === r3) {
+                balance += winReward;
+                updateBalanceUI();
+                status.innerText = `ПОБЕДА! +${winReward} 💰`;
+                status.style.color = '#34c759';
+                
+                // Вибрация успеха и конфетти (если поддерживается)
+                tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                status.innerText = "Попробуй еще раз";
+                status.style.color = '#888';
+            }
+        }
+    </script>
+</body>
+</html>
