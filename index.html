@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MineCraft Slots</title>
+    <title>Hardcore MineSlots</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         @font-face {
@@ -14,19 +14,19 @@
         :root {
             --bg-gui: #C6C6C6;
             --slot-bg: #8B8B8B;
-            --slot-border-light: #FFFFFF;
-            --slot-border-dark: #373737;
             --text-shadow: 2px 2px 0px #3f3f3f;
         }
 
         body {
-            background-color: #121212;
-            background-image: url('https://www.transparenttextures.com/patterns/dirt.png'); /* Текстура земли */
-            font-family: 'Minecraft', 'Courier New', monospace;
+            background-color: #1a1a1a;
+            /* Текстура камня на фоне */
+            background-image: repeating-linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222), repeating-linear-gradient(45deg, #222 25%, #1a1a1a 25%, #1a1a1a 75%, #222 75%, #222);
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+            font-family: 'Minecraft', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
             height: 100vh;
             margin: 0;
             color: white;
@@ -37,512 +37,542 @@
         /* --- UI Header --- */
         .header {
             width: 100%;
-            background: linear-gradient(to bottom, #74b72e 0%, #74b72e 50%, #563816 50%, #563816 100%);
-            padding: 10px 0;
+            /* Текстура травы с землей */
+            background: linear-gradient(to bottom, #589c28 0%, #589c28 40%, #5d4037 40%, #5d4037 100%);
+            padding: 15px 0;
             text-align: center;
             border-bottom: 4px solid #000;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.5);
-            z-index: 10;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            z-index: 20;
+            position: relative;
+        }
+        
+        /* Декор травы сверху */
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 10px;
+            background-color: #6bbe31; /* Светлая трава */
         }
 
         .balance-box {
-            font-size: 24px;
+            font-size: 28px;
             text-shadow: var(--text-shadow);
+            color: #fff;
         }
 
-        /* --- Main Game Container --- */
-        .game-container {
-            margin-top: 20px;
-            background-color: var(--bg-gui);
-            padding: 10px;
-            border: 4px solid #000;
-            border-radius: 4px;
-            box-shadow: inset -4px -4px #555, inset 4px 4px #FFF;
+        /* --- Game Area --- */
+        .game-wrapper {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            justify-content: center;
             align-items: center;
+            width: 100%;
+            max-width: 400px;
+            padding-bottom: 20px;
         }
 
-        /* --- The 3x5 Grid (Inventory) --- */
+        /* --- Slots (Inventory) --- */
+        .inventory-container {
+            background-color: var(--bg-gui);
+            padding: 6px;
+            border: 4px solid #373737;
+            border-radius: 4px;
+            box-shadow: inset 4px 4px #FFF, inset -4px -4px #555;
+            margin-bottom: 20px;
+        }
+
         .inventory-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 4px;
-            background: #C6C6C6;
         }
 
         .slot {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             background-color: var(--slot-bg);
-            border-bottom: 2px solid var(--slot-border-light);
-            border-right: 2px solid var(--slot-border-light);
-            border-top: 2px solid var(--slot-border-dark);
-            border-left: 2px solid var(--slot-border-dark);
+            border: 2px solid;
+            border-color: #373737 #FFF #FFF #373737; /* Вдавленный эффект */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 30px;
             position: relative;
         }
 
-        /* --- Mining Area (Blocks & Chests) --- */
+        /* --- Mining & Chests --- */
         .mining-area {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-            margin-top: 10px;
-            position: relative;
+            gap: 8px; /* Расстояние между колонками */
+            width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
-        .mining-column {
+        .mining-col {
+            position: relative;
+            width: 100%;
+            height: 70px; /* Высота зоны блока/сундука */
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 50px;
+            justify-content: flex-end;
         }
 
-        .block {
-            width: 48px;
-            height: 48px;
-            background-size: cover;
-            border: 2px solid #000;
-            position: relative;
-            image-rendering: pixelated;
+        /* Сундук (всегда снизу) */
+        .chest-base {
+            width: 50px;
+            height: 50px;
+            background-color: #6d4c41;
+            border: 2px solid #3e2723;
+            position: absolute;
+            bottom: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            color: white;
-            text-shadow: 1px 1px 0 #000;
-            transition: transform 0.1s;
-        }
-
-        /* CSS генерация текстур блоков (упрощенная) */
-        .block.dirt { background-color: #5d4037; }
-        .block.stone { background-color: #757575; }
-        .block.iron { background-color: #9e9e9e; background-image: radial-gradient(#d7ccc8 20%, transparent 20%); }
-        .block.gold { background-color: #757575; background-image: radial-gradient(#ffeb3b 20%, transparent 20%); }
-        .block.diamond { background-color: #757575; background-image: radial-gradient(#00e5ff 20%, transparent 20%); }
-        .block.obsidian { background-color: #212121; border-color: #4a148c; }
-
-        .chest {
-            width: 40px;
-            height: 30px;
-            margin-top: 5px;
             font-size: 24px;
-            text-align: center;
-            line-height: 30px;
+            z-index: 1;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+        }
+        
+        .chest-lid {
+            width: 50px;
+            height: 15px;
+            background-color: #8d6e63;
+            border: 2px solid #3e2723;
+            position: absolute;
+            top: -10px;
+            left: -2px;
             transition: transform 0.2s;
         }
 
-        .multiplier-popup {
+        .chest-base.open .chest-lid {
+            transform: translateY(-5px) rotateX(45deg);
+        }
+
+        /* Блок (перекрывает сундук) */
+        .block-obstacle {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #000;
             position: absolute;
-            color: #ffff00;
-            font-weight: bold;
-            font-size: 18px;
-            text-shadow: 2px 2px 0 #000;
-            animation: floatUp 1s forwards;
-            pointer-events: none;
-        }
-
-        /* --- Controls --- */
-        .controls {
-            margin-top: 20px;
+            bottom: 0;
+            z-index: 10; /* Сверху сундука */
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 10px;
-        }
-
-        button {
-            background-color: #7c7c7c;
-            border: 4px solid #000;
-            box-shadow: inset 4px 4px #b8b8b8, inset -4px -4px #373737;
-            color: #fff;
-            font-family: 'Minecraft', sans-serif;
-            font-size: 20px;
-            padding: 10px 40px;
-            cursor: pointer;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
             text-shadow: 2px 2px 0 #000;
+            image-rendering: pixelated;
         }
 
-        button:active {
-            box-shadow: inset 4px 4px #373737, inset -4px -4px #b8b8b8;
-            transform: translateY(2px);
+        /* Текстуры блоков (CSS only) */
+        .b-dirt { background: #5d4037; box-shadow: inset 4px 4px #795548; }
+        .b-stone { background: #757575; box-shadow: inset 4px 4px #9e9e9e; }
+        .b-coal { background: #757575; background-image: radial-gradient(#212121 20%, transparent 20%); background-size: 10px 10px; }
+        .b-iron { background: #9e9e9e; background-image: radial-gradient(#d7ccc8 25%, transparent 25%); background-size: 12px 12px;}
+        .b-gold { background: #757575; background-image: radial-gradient(#ffeb3b 25%, transparent 25%); background-size: 12px 12px;}
+        .b-diamond { background: #757575; background-image: radial-gradient(#00e5ff 25%, transparent 25%); background-size: 12px 12px;}
+        .b-obsidian { background: #1a1a1a; border-color: #4a148c; }
+
+        /* Controls */
+        .controls {
+            margin-top: auto;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
         }
 
-        button:disabled {
-            background-color: #555;
-            color: #aaa;
-            cursor: not-allowed;
+        .btn-spin {
+            background: #999;
+            border: 4px solid #000;
+            box-shadow: inset 4px 4px #ccc, inset -4px -4px #555, 0 6px 0 #000;
+            color: #fff;
+            font-family: 'Minecraft';
+            font-size: 24px;
+            padding: 15px 50px;
+            cursor: pointer;
+            text-shadow: 2px 2px #000;
+            width: 80%;
+            transition: transform 0.1s;
+        }
+
+        .btn-spin:active {
+            transform: translateY(6px);
+            box-shadow: inset 4px 4px #555, inset -4px -4px #ccc, 0 0 0 #000;
+        }
+
+        .btn-spin:disabled {
+            background: #555;
+            color: #888;
+            box-shadow: none;
+            transform: translateY(6px);
         }
 
         /* Animations */
-        @keyframes spin {
-            0% { transform: translateY(-5px); }
-            50% { transform: translateY(5px); }
-            100% { transform: translateY(-5px); }
+        @keyframes damageShake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-3px, 2px); filter: brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(5); } /* Красная вспышка */
+            50% { transform: translate(3px, -2px); }
+            75% { transform: translate(-3px, 0); }
+            100% { transform: translate(0, 0); filter: none; }
         }
 
-        @keyframes dropItem {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(150px); opacity: 0; }
+        @keyframes fallIn {
+            from { transform: translateY(-200px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
+        @keyframes popupFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(1.5); opacity: 0; }
         }
 
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-50px); opacity: 0; }
-        }
-
-        .spinning {
-            animation: spin 0.2s infinite linear;
-        }
+        .damaged { animation: damageShake 0.3s; }
+        .falling { animation: fallIn 0.4s ease-out; }
         
-        .dropping {
-            animation: dropItem 0.5s forwards ease-in;
+        .float-text {
+            position: absolute;
             z-index: 100;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+            animation: popupFloat 1s forwards;
+            pointer-events: none;
+            width: 100%;
+            text-align: center;
+            top: -20px;
         }
-
-        .shaking {
-            animation: shake 0.2s;
-        }
-
-        .item-img { filter: drop-shadow(2px 2px 0px #000); }
 
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="balance-box">💎 Баланс: <span id="balance">2000</span></div>
+        <div class="balance-box">💎 <span id="balance">5000</span></div>
     </div>
 
-    <div class="game-container">
-        <!-- 3x5 Grid -->
-        <div class="inventory-grid" id="grid">
-            <!-- Slots generated by JS -->
+    <div class="game-wrapper">
+        <!-- Слоты (Инвентарь) -->
+        <div class="inventory-container">
+            <div class="inventory-grid" id="slots-grid">
+                <!-- JS will fill this -->
+            </div>
         </div>
 
-        <!-- Mining Area -->
+        <!-- Зона блоков и сундуков -->
         <div class="mining-area" id="mining-area">
-            <!-- Blocks and Chests generated by JS -->
+            <!-- JS will fill this -->
         </div>
     </div>
 
     <div class="controls">
-        <div id="status" style="height: 20px; color: #ffff55; text-shadow: 1px 1px 0 #000;">Нажми Крутить!</div>
-        <button id="spin-btn" onclick="startGame()">КРУТИТЬ (100💎)</button>
+        <div id="info-text" style="color: #aaa; margin-bottom: 10px; font-size: 14px;">Кирки ломают блоки. В сундуках награда.</div>
+        <button class="btn-spin" id="spin-btn" onclick="spin()">КРУТИТЬ (100)</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- НАСТРОЙКИ (CONFIG) ---
+        /* --- HARDCORE CONFIG --- */
         const CONFIG = {
             spinCost: 100,
             rows: 3,
             cols: 5,
-            // Шансы выпадения в слотах (сумма весов не обязательно 100)
+            
+            // 1. Шанс выпадения в слоте (сумма весов)
+            // Много пустоты, мало хороших кирок.
             dropWeights: {
-                empty: 60,      // Пустой слот
-                wood_pick: 20,  // Деревянная кирка (Урон 1)
-                stone_pick: 10, // Каменная кирка (Урон 2)
-                iron_pick: 5,   // Железная кирка (Урон 3)
-                diamond_pick: 3,// Алмазная кирка (Урон 5)
-                ender_pearl: 2  // Эндерперл (Бонус)
+                empty: 100,      // Пустота (Самое частое)
+                wood_pick: 50,   // Дерево (Урон 1) - Частое
+                stone_pick: 30,  // Камень (Урон 2)
+                iron_pick: 10,   // Железо (Урон 4)
+                diamond_pick: 3, // Алмаз (Урон 10) - Редкое
+                tnt: 1           // ТНТ (Убивает блок сразу) - Очень редкое
             },
-            // Типы блоков и их прочность (HP)
+
+            // 2. Блоки и их прочность (HP)
+            // HP сбалансировано так, что с деревянной киркой (dmg 1) ломать долго.
             blockTypes: [
-                { type: 'dirt', hp: 1, color: '#5d4037' },
-                { type: 'stone', hp: 3, color: '#757575' },
-                { type: 'iron', hp: 5, color: '#9e9e9e' },
-                { type: 'gold', hp: 8, color: '#fbc02d' },
-                { type: 'diamond', hp: 12, color: '#00bcd4' },
-                { type: 'obsidian', hp: 20, color: '#212121' }
+                { id: 'dirt', hp: 5, class: 'b-dirt', name: 'Земля' },      // 5 ударов деревом
+                { id: 'stone', hp: 15, class: 'b-stone', name: 'Камень' },  // 15 ударов деревом
+                { id: 'coal', hp: 25, class: 'b-coal', name: 'Уголь' },
+                { id: 'iron', hp: 40, class: 'b-iron', name: 'Железо' },
+                { id: 'gold', hp: 60, class: 'b-gold', name: 'Золото' },
+                { id: 'diamond', hp: 100, class: 'b-diamond', name: 'Алмаз' },
+                { id: 'obsidian', hp: 200, class: 'b-obsidian', name: 'Обсидиан' }
             ],
-            // Настройка множителей сундука
-            multiplierMin: 1.2,
-            multiplierMax: 5.0
+
+            // 3. Экономика сундуков (Множители от стоимости спина)
+            // Чтобы "не окупалось": Средний множитель должен быть ниже, 
+            // чем среднее кол-во спинов на ломание блока.
+            multipliers: [0.1, 0.2, 0.5, 0.5, 1.0, 1.5, 2.0, 5.0, 10.0],
+            // Веса для множителей (чаще всего выпадает 0.5x - 1.0x)
+            multiplierWeights: [30, 30, 20, 10, 5, 3, 1, 0.5, 0.1] 
         };
 
         const ITEMS = {
-            wood_pick: { emoji: '⛏️', color: '#8d6e63', dmg: 1 },
-            stone_pick: { emoji: '⛏️', color: '#9e9e9e', dmg: 2 },
-            iron_pick: { emoji: '⛏️', color: '#eceff1', dmg: 3 },
-            diamond_pick: { emoji: '⛏️', color: '#00e5ff', dmg: 5 },
-            ender_pearl: { emoji: '🔮', color: '#009688', bonus: 250 }, // Прямой бонус
-            empty: { emoji: '', color: 'transparent', dmg: 0 }
+            wood_pick: { img: '🪵', dmg: 1, color: '#8d6e63' },
+            stone_pick: { img: '🪨', dmg: 2, color: '#9e9e9e' },
+            iron_pick: { img: '⚪', dmg: 4, color: '#fff' },
+            diamond_pick: { img: '💎', dmg: 10, color: '#00e5ff' },
+            tnt: { img: '🧨', dmg: 999, color: '#ff5252' },
+            empty: { img: '', dmg: 0, color: 'transparent' }
         };
 
-        let balance = parseInt(localStorage.getItem('mc_balance')) || 2000;
-        let isSpinning = false;
-        
-        // Состояние блоков (5 колонок)
-        let blockState = []; 
+        let balance = parseInt(localStorage.getItem('hc_balance')) || 5000;
+        let blockStates = []; // Текущее состояние блоков в 5 колонках
 
-        // Инициализация
         function init() {
-            updateBalanceUI();
-            createGrid();
+            renderUI();
+            createSlots();
             createMiningArea();
         }
 
-        // Создаем сетку инвентаря
-        function createGrid() {
-            const grid = document.getElementById('grid');
+        function renderUI() {
+            document.getElementById('balance').innerText = Math.floor(balance);
+            localStorage.setItem('hc_balance', Math.floor(balance));
+        }
+
+        function createSlots() {
+            const grid = document.getElementById('slots-grid');
             grid.innerHTML = '';
-            for (let i = 0; i < CONFIG.rows * CONFIG.cols; i++) {
-                let div = document.createElement('div');
-                div.className = 'slot';
-                div.id = `slot-${i}`;
-                grid.appendChild(div);
+            for(let i=0; i<15; i++) {
+                let slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.id = `slot-${i}`;
+                grid.appendChild(slot);
             }
         }
 
-        // Создаем зону майнинга (блоки + сундуки)
         function createMiningArea() {
             const area = document.getElementById('mining-area');
             area.innerHTML = '';
-            blockState = [];
+            
+            // Если первый запуск, генерируем блоки
+            if (blockStates.length === 0) {
+                // Пытаемся загрузить состояние (если играли ранее)
+                let saved = localStorage.getItem('hc_blocks');
+                if (saved) {
+                    blockStates = JSON.parse(saved);
+                } else {
+                    for(let i=0; i<CONFIG.cols; i++) blockStates.push(generateNewBlock());
+                }
+            }
 
-            for (let i = 0; i < CONFIG.cols; i++) {
-                // Создаем контейнер колонки
+            for(let i=0; i<CONFIG.cols; i++) {
                 let col = document.createElement('div');
-                col.className = 'mining-column';
-                col.id = `mining-col-${i}`;
+                col.className = 'mining-col';
+                col.id = `col-${i}`;
 
-                // Генерируем новый блок
-                let newBlock = generateRandomBlock();
-                blockState.push(newBlock);
+                // Сундук (Background layer)
+                let chest = document.createElement('div');
+                chest.className = 'chest-base';
+                chest.innerHTML = `<div class="chest-lid"></div><span id="chest-content-${i}"></span>`;
+                col.appendChild(chest);
 
-                // HTML Блока
-                let blockDiv = document.createElement('div');
-                blockDiv.className = `block ${newBlock.type}`;
-                blockDiv.id = `block-${i}`;
-                blockDiv.innerText = newBlock.hp; // Показываем HP
+                // Блок (Foreground layer)
+                renderBlockInCol(col, i);
 
-                // HTML Сундука
-                let chestDiv = document.createElement('div');
-                chestDiv.className = 'chest';
-                chestDiv.innerText = '📦';
-                chestDiv.id = `chest-${i}`;
-
-                col.appendChild(blockDiv);
-                col.appendChild(chestDiv);
                 area.appendChild(col);
             }
         }
 
-        // Генерация случайного блока на основе весов (упрощено - просто рандом)
-        function generateRandomBlock() {
+        function renderBlockInCol(colElement, index) {
+            // Удаляем старый блок если есть
+            let old = colElement.querySelector('.block-obstacle');
+            if (old) old.remove();
+
+            let data = blockStates[index];
+            let block = document.createElement('div');
+            block.className = `block-obstacle ${data.class}`;
+            block.id = `block-${index}`;
+            block.innerText = data.currentHp;
+            colElement.appendChild(block);
+        }
+
+        function generateNewBlock() {
+            // Рандом блока. Чем круче блок, тем реже.
             const rand = Math.random();
-            if (rand < 0.4) return { ...CONFIG.blockTypes[0] }; // Dirt 40%
-            if (rand < 0.7) return { ...CONFIG.blockTypes[1] }; // Stone 30%
-            if (rand < 0.85) return { ...CONFIG.blockTypes[2] }; // Iron 15%
-            if (rand < 0.95) return { ...CONFIG.blockTypes[3] }; // Gold 10%
-            return { ...CONFIG.blockTypes[4] }; // Diamond 5%
+            let type;
+            if (rand < 0.4) type = CONFIG.blockTypes[0];      // Dirt
+            else if (rand < 0.7) type = CONFIG.blockTypes[1]; // Stone
+            else if (rand < 0.85) type = CONFIG.blockTypes[2];// Coal
+            else if (rand < 0.92) type = CONFIG.blockTypes[3];// Iron
+            else if (rand < 0.97) type = CONFIG.blockTypes[4];// Gold
+            else if (rand < 0.99) type = CONFIG.blockTypes[5];// Diamond
+            else type = CONFIG.blockTypes[6];                 // Obsidian
+
+            return { ...type, currentHp: type.hp }; // Копия объекта с текущим HP
         }
 
-        function updateBalanceUI() {
-            document.getElementById('balance').innerText = Math.floor(balance);
-            localStorage.setItem('mc_balance', Math.floor(balance));
-        }
+        let isSpinning = false;
 
-        // --- ЛОГИКА ИГРЫ ---
-
-        async function startGame() {
+        async function spin() {
             if (isSpinning) return;
             if (balance < CONFIG.spinCost) {
-                tg.showAlert("Не хватает алмазов! 💎");
+                tg.showAlert("Недостаточно средств!");
                 return;
             }
 
             balance -= CONFIG.spinCost;
-            updateBalanceUI();
+            renderUI();
             isSpinning = true;
             document.getElementById('spin-btn').disabled = true;
-            document.getElementById('status').innerText = "Майним...";
-            
+
             tg.HapticFeedback.impactOccurred('medium');
 
-            // 1. Анимация кручения
+            // 1. Вращение слотов
+            const slotResults = [];
             const slots = document.querySelectorAll('.slot');
-            slots.forEach(s => {
-                s.innerText = getRandomItemKey().emoji || '❓';
-                s.classList.add('spinning');
-            });
-
-            // Ждем 1 секунду кручения
-            await new Promise(r => setTimeout(r, 1000));
-
-            // 2. Остановка и результаты
-            let results = []; // Двумерный массив [col][row]
             
-            // Инициализация структуры результатов по колонкам
-            for(let c=0; c<CONFIG.cols; c++) results[c] = [];
+            // Анимация визуального шума
+            let spinInterval = setInterval(() => {
+                slots.forEach(s => s.innerText = Math.random() > 0.5 ? '⛏️' : '');
+            }, 100);
 
-            slots.forEach((s, index) => {
-                s.classList.remove('spinning');
-                
-                // Определяем предмет
-                let itemKey = getWeightedRandomItem();
-                let itemData = ITEMS[itemKey];
-                
-                // Стилизация (цвет кирок)
-                if (itemData.emoji) {
-                    s.innerHTML = `<span style="color:${itemData.color}" class="item-img">${itemData.emoji}</span>`;
+            await new Promise(r => setTimeout(r, 800));
+            clearInterval(spinInterval);
+
+            // 2. Генерация результатов
+            for (let i = 0; i < 15; i++) {
+                let itemKey = getWeightedRandom(CONFIG.dropWeights);
+                slotResults.push(itemKey);
+                let el = document.getElementById(`slot-${i}`);
+                el.innerText = ITEMS[itemKey].img;
+                if (ITEMS[itemKey].color !== 'transparent') {
+                    el.style.textShadow = `0 0 10px ${ITEMS[itemKey].color}`;
                 } else {
-                    s.innerHTML = '';
+                    el.style.textShadow = 'none';
                 }
+            }
 
-                // Записываем результат по колонкам
-                let col = index % CONFIG.cols;
-                results[col].push(itemKey);
-            });
+            // 3. Применение урона (Логика падения)
+            await applyDamage(slotResults);
 
-            // 3. Обработка выпавших предметов
-            await processDrops(results);
+            // Сохраняем прогресс блоков
+            localStorage.setItem('hc_blocks', JSON.stringify(blockStates));
 
             isSpinning = false;
             document.getElementById('spin-btn').disabled = false;
-            document.getElementById('status').innerText = "Готово!";
         }
 
-        // Выбор случайного предмета с учетом весов
-        function getWeightedRandomItem() {
-            let totalWeight = 0;
-            for (let k in CONFIG.dropWeights) totalWeight += CONFIG.dropWeights[k];
+        async function applyDamage(flatResults) {
+            // Преобразуем 15 слотов в 5 колонок по 3 ряда
+            for (let col = 0; col < CONFIG.cols; col++) {
+                let totalDmgInCol = 0;
+                let hasTNT = false;
+
+                // Проверяем 3 слота над колонкой
+                for (let row = 0; row < CONFIG.rows; row++) {
+                    let itemKey = flatResults[row * CONFIG.cols + col];
+                    if (itemKey === 'tnt') hasTNT = true;
+                    totalDmgInCol += ITEMS[itemKey].dmg;
+                }
+
+                if (totalDmgInCol > 0) {
+                    let blockEl = document.getElementById(`block-${col}`);
+                    
+                    // Визуальный эффект удара
+                    if(blockEl) {
+                        blockEl.classList.add('damaged');
+                        setTimeout(() => blockEl.classList.remove('damaged'), 300);
+                        tg.HapticFeedback.impactOccurred('light');
+                    }
+
+                    // Обновляем данные
+                    if (hasTNT) blockStates[col].currentHp = 0;
+                    else blockStates[col].currentHp -= totalDmgInCol;
+
+                    // Обновляем текст на блоке
+                    if (blockEl) blockEl.innerText = Math.max(0, blockStates[col].currentHp);
+
+                    // Если блок сломан
+                    if (blockStates[col].currentHp <= 0) {
+                        await breakBlock(col);
+                    }
+                }
+            }
+        }
+
+        async function breakBlock(colIndex) {
+            let colEl = document.getElementById(`col-${colIndex}`);
+            let blockEl = document.getElementById(`block-${colIndex}`);
             
-            let random = Math.random() * totalWeight;
-            for (let k in CONFIG.dropWeights) {
-                if (random < CONFIG.dropWeights[k]) return k;
-                random -= CONFIG.dropWeights[k];
+            // Звук (вибрация) успеха
+            tg.HapticFeedback.notificationOccurred('success');
+
+            // 1. Исчезновение блока
+            if (blockEl) blockEl.style.display = 'none';
+
+            // 2. Открытие сундука
+            let chestBase = colEl.querySelector('.chest-base');
+            chestBase.classList.add('open');
+
+            // 3. Расчет награды (Жадный рандом)
+            // Выбираем индекс множителя на основе весов
+            let multIndex = getWeightedIndex(CONFIG.multiplierWeights);
+            let multiplier = CONFIG.multipliers[multIndex];
+            
+            let win = Math.floor(CONFIG.spinCost * multiplier);
+            
+            // Показать текст награды
+            let floatText = document.createElement('div');
+            floatText.className = 'float-text';
+            floatText.innerHTML = `<span style="color:#ff5555">-${CONFIG.spinCost} сп</span> <span style="color:#55ff55">+${win}</span>`;
+            if (multiplier < 1.0) floatText.style.color = '#ff5555'; // Красный если не окупилось
+            else floatText.style.color = '#ffff55'; // Золотой если окупилось
+            
+            colEl.appendChild(floatText);
+            setTimeout(() => floatText.remove(), 1500);
+
+            balance += win;
+            renderUI();
+
+            // 4. Пауза и появление нового блока
+            await new Promise(r => setTimeout(r, 1000));
+
+            chestBase.classList.remove('open'); // Закрыть сундук
+            
+            // Новый блок
+            blockStates[colIndex] = generateNewBlock();
+            renderBlockInCol(colEl, colIndex);
+            
+            // Анимация падения
+            let newBlock = document.getElementById(`block-${colIndex}`);
+            newBlock.classList.add('falling');
+        }
+
+        // Утилита для взвешенного рандома (возвращает КЛЮЧ объекта)
+        function getWeightedRandom(weightsObj) {
+            let total = 0;
+            for (let k in weightsObj) total += weightsObj[k];
+            let rand = Math.random() * total;
+            for (let k in weightsObj) {
+                if (rand < weightsObj[k]) return k;
+                rand -= weightsObj[k];
             }
             return 'empty';
         }
 
-        // Для визуального шума при кручении
-        function getRandomItemKey() {
-             const keys = Object.keys(ITEMS);
-             return ITEMS[keys[Math.floor(Math.random() * keys.length)]];
-        }
-
-        // Обработка падения кирок
-        async function processDrops(results) {
-            let totalWin = 0;
-
-            // Проходимся по каждой колонке
-            for (let col = 0; col < CONFIG.cols; col++) {
-                let columnItems = results[col];
-                let blockDiv = document.getElementById(`block-${col}`);
-                
-                // Проверяем каждый слот в колонке сверху вниз
-                for (let row = 0; row < CONFIG.rows; row++) {
-                    let itemKey = columnItems[row];
-                    
-                    if (itemKey === 'empty') continue;
-
-                    // Если Эндерперл - мгновенный бонус
-                    if (itemKey === 'ender_pearl') {
-                        showFloatText(col, `+${ITEMS.ender_pearl.bonus}`, '#00ff00');
-                        balance += ITEMS.ender_pearl.bonus;
-                        updateBalanceUI();
-                        tg.HapticFeedback.notificationOccurred('success');
-                        continue;
-                    }
-
-                    // Если кирка - анимация атаки блока
-                    let dmg = ITEMS[itemKey].dmg;
-                    
-                    // Визуально "роняем" кирку из слота
-                    let slotIndex = row * CONFIG.cols + col;
-                    let slotDiv = document.getElementById(`slot-${slotIndex}`);
-                    
-                    // Эффект удара (упрощенный: просто тряска блока через задержку)
-                    // В реальном app можно сделать летящий div
-                    
-                    await new Promise(r => setTimeout(r, 200)); // небольшая пауза между ударами
-                    
-                    blockDiv.classList.add('shaking');
-                    setTimeout(() => blockDiv.classList.remove('shaking'), 200);
-                    tg.HapticFeedback.impactOccurred('light');
-
-                    // Наносим урон блоку
-                    blockState[col].hp -= dmg;
-                    
-                    if (blockState[col].hp <= 0) {
-                        blockDiv.innerText = "0";
-                        // Блок разбит! Открываем сундук
-                        let win = await openChest(col);
-                        totalWin += win;
-                        
-                        // Респавн блока
-                        let newBlock = generateRandomBlock();
-                        blockState[col] = newBlock;
-                        
-                        // Анимация смены блока
-                        blockDiv.style.opacity = '0';
-                        setTimeout(() => {
-                            blockDiv.className = `block ${newBlock.type}`;
-                            blockDiv.innerText = newBlock.hp;
-                            blockDiv.style.opacity = '1';
-                        }, 200);
-                    } else {
-                        // Обновляем HP визуально
-                        blockDiv.innerText = blockState[col].hp;
-                    }
-                }
+        // Утилита для взвешенного рандома (возвращает ИНДЕКС массива)
+        function getWeightedIndex(weightsArr) {
+            let total = weightsArr.reduce((a, b) => a + b, 0);
+            let rand = Math.random() * total;
+            for (let i = 0; i < weightsArr.length; i++) {
+                if (rand < weightsArr[i]) return i;
+                rand -= weightsArr[i];
             }
+            return 0;
         }
 
-        async function openChest(colIndex) {
-            let chestDiv = document.getElementById(`chest-${colIndex}`);
-            chestDiv.innerText = '💰'; // Открытый сундук
-            
-            // Расчет выигрыша
-            let multiplier = (Math.random() * (CONFIG.multiplierMax - CONFIG.multiplierMin) + CONFIG.multiplierMin).toFixed(1);
-            let winAmount = Math.floor(CONFIG.spinCost * multiplier);
-            
-            showFloatText(colIndex, `x${multiplier}\n+${winAmount}`, '#ffff00');
-            
-            balance += winAmount;
-            updateBalanceUI();
-            tg.HapticFeedback.notificationOccurred('success');
-
-            // Возвращаем сундук в исходное состояние через секунду
-            setTimeout(() => {
-                chestDiv.innerText = '📦';
-            }, 1000);
-
-            return winAmount;
-        }
-
-        function showFloatText(colIndex, text, color) {
-            let miningCol = document.getElementById(`mining-col-${colIndex}`);
-            let floatDiv = document.createElement('div');
-            floatDiv.className = 'multiplier-popup';
-            floatDiv.innerText = text;
-            floatDiv.style.color = color;
-            miningCol.appendChild(floatDiv);
-            
-            setTimeout(() => floatDiv.remove(), 1000);
-        }
-
-        // Запуск
         init();
-
     </script>
 </body>
 </html>
