@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Minecraft Miner Real</title>
+    <title>Pixel Games Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         @font-face {
@@ -16,187 +16,249 @@
         body {
             margin: 0; padding: 0;
             font-family: 'Minecraft', sans-serif;
-            background-color: #87CEEB;
+            background-color: #2c2c2c; /* Темный фон для меню */
             height: 100vh;
+            color: white;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             user-select: none;
         }
 
-        /* --- UI ВЕРХ --- */
-        .ui-top {
-            padding: 10px;
+        /* --- HEADER (Common) --- */
+        .app-header {
+            height: 60px;
+            background: #1e1e1e;
+            border-bottom: 4px solid #000;
             display: flex;
-            justify-content: center;
-            z-index: 20;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 100;
         }
 
-        .inventory {
-            background: #C6C6C6;
-            border: 4px solid #373737;
-            padding: 4px;
-            box-shadow: inset 4px 4px #FFF, inset -4px -4px #555;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 2px;
-            width: 100%;
-            max-width: 360px;
-        }
-
-        .slot {
-            aspect-ratio: 1;
-            background: #8B8B8B;
-            border-bottom: 2px solid #FFF;
-            border-right: 2px solid #FFF;
-            border-top: 2px solid #373737;
-            border-left: 2px solid #373737;
+        .header-balance {
+            font-size: 20px;
+            color: #FFD700;
+            text-shadow: 2px 2px 0 #000;
             display: flex;
             align-items: center;
+            gap: 5px;
+        }
+
+        .profile-btn {
+            width: 40px; height: 40px;
+            background: #8B8B8B;
+            border: 2px solid #fff;
+            image-rendering: pixelated;
+            cursor: pointer;
+            display: flex;
+            align-items: center; justify-content: center;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            flex: 1;
+            display: none; /* Скрыты по умолчанию */
+            flex-direction: column;
+            overflow-y: auto;
+            width: 100%;
+            height: 100%;
+        }
+        .screen.active { display: flex; }
+
+        /* --- MENU SCREEN --- */
+        .menu-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .game-card {
+            background: #5d4037;
+            border: 4px solid #3e2723;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #000;
+            transition: transform 0.1s;
+            position: relative;
+        }
+        .game-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+        
+        .game-icon { width: 50%; height: 50%; margin-bottom: 10px; }
+        .game-title { font-size: 14px; text-shadow: 1px 1px 0 #000; }
+        
+        .locked { filter: grayscale(1); opacity: 0.7; }
+        .locked::after { content: 'SOON'; position: absolute; color: red; font-weight: bold; transform: rotate(-20deg); text-shadow: 1px 1px 0 #000; font-size: 20px;}
+
+        /* --- PROFILE SCREEN --- */
+        .profile-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .avatar-big {
+            width: 80px; height: 80px;
+            background: #8B8B8B;
+            border: 4px solid #fff;
+            margin-bottom: 10px;
+        }
+        .history-list {
+            width: 100%;
+            margin-top: 20px;
+            background: #373737;
+            border: 2px solid #000;
+        }
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #555;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .win { color: #55ff55; }
+        .loss { color: #ff5555; }
+
+        /* --- GAME SCREEN (Miner specific) --- */
+        #screen-game {
+            background-color: #87CEEB; /* Небо */
             position: relative;
         }
         
-        .slot img {
-            width: 80%;
-            height: 80%;
-            image-rendering: pixelated; /* Пиксельный вид */
-            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5));
-        }
-
-        /* --- ИГРОВОЕ ПОЛЕ --- */
-        .game-area {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 80px;
-            position: relative;
-            width: 100%;
-        }
-
-        .cols-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            width: 100%;
-            max-width: 360px;
-            height: 100%;
-            gap: 4px;
-            padding: 0 6px;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            position: relative;
-            height: 100%;
-        }
-
-        /* --- БЛОКИ --- */
-        .block {
-            width: 100%;
-            aspect-ratio: 1;
-            margin-bottom: 2px;
-            position: relative;
-            border: 2px solid rgba(0,0,0,0.2);
-            image-rendering: pixelated;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
+        .game-back-btn {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: #ff5555;
+            border: 2px solid #fff;
             color: white;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        /* Цвета блоков */
-        .b-dirt { background: #5d4037; }
-        .b-stone { background: #757575; }
-        .b-iron { background: #9e9e9e; }
-        .b-gold { background: #fbc02d; }
-        .b-diamond { background: #00bcd4; border: 2px solid #0097a7; }
-        .b-obsidian { background: #14001c; border: 2px solid #4a148c; }
-
-        .cracks {
-            position: absolute; top:0; left:0; right:0; bottom:0;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.4) 10px, rgba(0,0,0,0.4) 12px);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* --- ЛЕТАЮЩАЯ КИРКА --- */
-        .flying-tool {
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            z-index: 1000;
-            pointer-events: none;
-            image-rendering: pixelated;
-            filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3));
-            transition: transform 0.4s cubic-bezier(0.55, 0.055, 0.675, 0.19); /* Ускорение вниз */
-        }
-
-        /* --- СУНДУК --- */
-        .chest-box {
-            width: 100%;
-            aspect-ratio: 1;
-            margin-top: 4px;
-            background: #a16b47;
-            border: 2px solid #3e2723;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        .chest-box::after { content: ''; width: 6px; height: 8px; background: #ccc; border: 1px solid #000; }
-        .chest-box.open { background: #ffd700; } /* Золотой при открытии */
-
-        /* --- НИЗ --- */
-        .ground-controls {
-            position: absolute; bottom: 0; width: 100%; height: 70px;
-            background: #5d4037; border-top: 10px solid #589c28;
-            display: flex; align-items: center; justify-content: center; z-index: 50;
+            font-family: 'Minecraft';
+            padding: 5px 10px;
+            z-index: 500;
+            box-shadow: 2px 2px 0 #000;
             cursor: pointer;
-            box-shadow: 0 -5px 10px rgba(0,0,0,0.3);
-        }
-        .balance-btn {
-            background: #373737; color: #fff; padding: 10px 40px;
-            border: 3px solid #fff; font-size: 24px; text-shadow: 2px 2px #000; border-radius: 4px;
         }
 
-        /* --- Анимации --- */
-        @keyframes blockHit {
-            0% { transform: scale(1); filter: none; }
-            50% { transform: scale(0.95); filter: brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg); } /* Красный миг */
-            100% { transform: scale(1); filter: none; }
-        }
+        /* --- Стили игры Miner (вставленные из прошлого ответа) --- */
+        .ui-top { padding: 10px; display: flex; justify-content: center; z-index: 20; margin-top: 40px; }
+        .inventory { background: #C6C6C6; border: 4px solid #373737; padding: 4px; box-shadow: inset 4px 4px #FFF, inset -4px -4px #555; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 2px; width: 100%; max-width: 360px; }
+        .slot { aspect-ratio: 1; background: #8B8B8B; border-bottom: 2px solid #FFF; border-right: 2px solid #FFF; border-top: 2px solid #373737; border-left: 2px solid #373737; display: flex; align-items: center; justify-content: center; position: relative; }
+        .slot img { width: 80%; height: 80%; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
+        .game-area { flex: 1; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 80px; position: relative; width: 100%; }
+        .cols-container { display: grid; grid-template-columns: repeat(5, 1fr); width: 100%; max-width: 360px; height: 100%; gap: 4px; padding: 0 6px; }
+        .column { display: flex; flex-direction: column; justify-content: flex-end; position: relative; height: 100%; }
+        .block { width: 100%; aspect-ratio: 1; margin-bottom: 2px; position: relative; border: 2px solid rgba(0,0,0,0.2); image-rendering: pixelated; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; text-shadow: 1px 1px 0 #000; }
+        .b-dirt { background: #5d4037; } .b-stone { background: #757575; } .b-iron { background: #9e9e9e; } .b-gold { background: #fbc02d; } .b-diamond { background: #00bcd4; border: 2px solid #0097a7; } .b-obsidian { background: #14001c; border: 2px solid #4a148c; }
+        .cracks { position: absolute; top:0; left:0; right:0; bottom:0; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.4) 10px, rgba(0,0,0,0.4) 12px); opacity: 0; pointer-events: none; }
+        .flying-tool { position: fixed; width: 40px; height: 40px; z-index: 1000; pointer-events: none; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3)); transition: transform 0.4s cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+        .chest-box { width: 100%; aspect-ratio: 1; margin-top: 4px; background: #a16b47; border: 2px solid #3e2723; display: flex; align-items: center; justify-content: center; position: relative; }
+        .chest-box::after { content: ''; width: 6px; height: 8px; background: #ccc; border: 1px solid #000; }
+        .chest-box.open { background: #ffd700; }
+        .ground-controls { position: absolute; bottom: 0; width: 100%; height: 70px; background: #5d4037; border-top: 10px solid #589c28; display: flex; align-items: center; justify-content: center; z-index: 50; cursor: pointer; box-shadow: 0 -5px 10px rgba(0,0,0,0.3); }
+        .balance-btn { background: #373737; color: #fff; padding: 10px 40px; border: 3px solid #fff; font-size: 24px; text-shadow: 2px 2px #000; border-radius: 4px; }
         .damaged { animation: blockHit 0.1s; }
+        .float-text { position: absolute; width: 100%; text-align: center; bottom: 100%; font-weight: bold; font-size: 18px; color: #FFD700; text-shadow: 2px 2px 0 #000; animation: floatText 1s forwards; pointer-events: none; z-index: 100; }
 
-        @keyframes floatText {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-60px); opacity: 0; }
-        }
-        .float-text {
-            position: absolute; width: 100%; text-align: center; bottom: 100%;
-            font-weight: bold; font-size: 18px; color: #FFD700; text-shadow: 2px 2px 0 #000;
-            animation: floatText 1s forwards; pointer-events: none; z-index: 100;
-        }
+        @keyframes blockHit { 0% { transform: scale(1); filter: none; } 50% { transform: scale(0.95); filter: brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg); } 100% { transform: scale(1); filter: none; } }
+        @keyframes floatText { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div class="ui-top">
-        <div class="inventory" id="slots"></div>
+    <!-- HEADER (Всегда виден) -->
+    <div class="app-header">
+        <div class="header-balance">
+            💎 <span id="global-balance">0</span>
+        </div>
+        <div class="profile-btn" onclick="navTo('profile')">
+            <!-- Иконка головы Стива -->
+            <svg viewBox="0 0 8 8" width="24" height="24">
+                <rect width="8" height="8" fill="#F0A678"/>
+                <rect x="2" y="2" width="1" height="1" fill="#fff"/>
+                <rect x="6" y="2" width="1" height="1" fill="#fff"/>
+                <rect x="2" y="5" width="4" height="1" fill="#6B3320"/>
+                <rect width="8" height="2" fill="#3D2115"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="game-area">
-        <div class="cols-container" id="mining-cols"></div>
+    <!-- 1. ГЛАВНОЕ МЕНЮ -->
+    <div id="screen-menu" class="screen active">
+        <div style="text-align: center; padding: 20px;">
+            <h1 style="margin: 0; color: #fff; text-shadow: 4px 4px 0 #000;">GAME HUB</h1>
+        </div>
+        <div class="menu-grid">
+            <!-- Игра 1 (Активная) -->
+            <div class="game-card" onclick="navTo('game')">
+                <div class="game-icon">
+                    <svg viewBox="0 0 16 16" width="100%" height="100%">
+                        <path fill="#8d6e63" d="M8 1h3v1h1v1h1v1h1v2h-1v-1h-1v-1h-1v-1H8v1H7v1H6v1H5v-2h1v-1h1v-1h1zm-3 4h1v1h1v1H6v1H5v-1H4v-1h1z"/>
+                    </svg>
+                </div>
+                <div class="game-title">MINER</div>
+            </div>
+
+            <!-- Игра 2 (Заглушка) -->
+            <div class="game-card locked">
+                <div class="game-icon" style="background: #333;"></div>
+                <div class="game-title">SLOTS</div>
+            </div>
+
+            <!-- Игра 3 (Заглушка) -->
+            <div class="game-card locked">
+                <div class="game-icon" style="background: #333;"></div>
+                <div class="game-title">CRASH</div>
+            </div>
+            
+             <!-- Игра 4 (Заглушка) -->
+             <div class="game-card locked">
+                <div class="game-icon" style="background: #333;"></div>
+                <div class="game-title">PVP</div>
+            </div>
+        </div>
     </div>
 
-    <div class="ground-controls" onclick="spin()">
-        <div class="balance-btn">
-            <span id="balance">0</span> $
+    <!-- 2. ПРОФИЛЬ -->
+    <div id="screen-profile" class="screen" style="background: #222;">
+        <button class="game-back-btn" style="position:relative; top:10px; left:10px; width: 80px;" onclick="navTo('menu')">< НАЗАД</button>
+        
+        <div class="profile-content">
+            <div class="avatar-big">
+                 <svg viewBox="0 0 8 8" width="100%" height="100%">
+                    <rect width="8" height="8" fill="#F0A678"/>
+                    <rect width="8" height="2" fill="#3D2115"/>
+                </svg>
+            </div>
+            <h2 id="profile-name">Steve</h2>
+            <div style="color: #aaa; font-size: 12px;" id="profile-id">ID: 000000</div>
+
+            <div class="history-list" id="history-container">
+                <!-- История игр -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. ИГРА MINER (Код игры) -->
+    <div id="screen-game" class="screen">
+        <button class="game-back-btn" onclick="navTo('menu')">В МЕНЮ</button>
+
+        <div class="ui-top">
+            <div class="inventory" id="slots"></div>
+        </div>
+
+        <div class="game-area">
+            <div class="cols-container" id="mining-cols"></div>
+        </div>
+
+        <div class="ground-controls" onclick="spin()">
+            <div class="balance-btn">
+                <span id="game-balance-display">SPIN</span>
+            </div>
         </div>
     </div>
 
@@ -204,56 +266,97 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- ГЕНЕРАТОР SVG КИРОК (Чтобы не грузить картинки) ---
-        // Рисуем кирку по пиксельной сетке 16x16
-        function getPickaxeSVG(headColor) {
-            return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='${encodeURIComponent(headColor)}' d='M8 1h3v1h1v1h1v1h1v2h-1v-1h-1v-1h-1v-1H8v1H7v1H6v1H5v-2h1v-1h1v-1h1zm-3 4h1v1h1v1H6v1H5v-1H4v-1h1z'/><path fill='%235d4037' d='M6 6h1v1H6zM5 7h1v1H5zM4 8h1v1H4zM3 9h1v1H3zM2 10h1v1H2zM1 11h1v2h2v-1h-1v-1h-1z'/></svg>`;
-        }
-        // Генератор ТНТ
-        function getTntSVG() {
-            return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='2' width='12' height='12' fill='%23d32f2f'/><rect x='3' y='2' width='3' height='12' fill='%23e57373' opacity='0.5'/><rect x='8' y='2' width='3' height='12' fill='%23e57373' opacity='0.5'/><text x='8' y='11' font-family='monospace' font-size='6' fill='white' text-anchor='middle'>TNT</text><rect x='6' y='1' width='4' height='1' fill='gray'/></svg>`;
+        // --- GLOBAL STATE ---
+        let balance = parseInt(localStorage.getItem('hub_balance')) || 3000;
+        let gameHistory = JSON.parse(localStorage.getItem('hub_history')) || [];
+
+        // --- NAVIGATION ---
+        function navTo(screenId) {
+            // Скрыть все экраны
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            
+            // Показать нужный
+            document.getElementById(`screen-${screenId}`).classList.add('active');
+
+            // Логика при переключении
+            if (screenId === 'profile') renderProfile();
+            if (screenId === 'menu') tg.BackButton.hide();
+            else tg.BackButton.show();
         }
 
-        const IMAGES = {
-            wood: getPickaxeSVG('#8d6e63'),   // Коричневая
-            stone: getPickaxeSVG('#9e9e9e'),  // Серая
-            iron: getPickaxeSVG('#ffffff'),   // Белая
-            diamond: getPickaxeSVG('#00e5ff'),// Голубая
-            tnt: getTntSVG(),
-            empty: null
-        };
+        // Обработка кнопки "Назад" в самом Телеграме
+        tg.BackButton.onClick(() => {
+            navTo('menu');
+        });
 
+        function updateBalance(amount) {
+            balance += amount;
+            localStorage.setItem('hub_balance', balance);
+            document.getElementById('global-balance').innerText = balance;
+            // Обновляем кнопку в игре, но не показываем там баланс текстом, просто чтобы переменная была свежей
+        }
+
+        function addToHistory(game, profit) {
+            const item = { game, profit, date: new Date().toLocaleTimeString() };
+            gameHistory.unshift(item); // Добавить в начало
+            if(gameHistory.length > 10) gameHistory.pop(); // Храним только 10 последних
+            localStorage.setItem('hub_history', JSON.stringify(gameHistory));
+        }
+
+        function renderProfile() {
+            // Данные пользователя
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                document.getElementById('profile-name').innerText = tg.initDataUnsafe.user.first_name;
+                document.getElementById('profile-id').innerText = "ID: " + tg.initDataUnsafe.user.id;
+            }
+
+            // История
+            const list = document.getElementById('history-container');
+            list.innerHTML = '';
+            if(gameHistory.length === 0) {
+                list.innerHTML = '<div class="history-item">Пусто...</div>';
+            } else {
+                gameHistory.forEach(h => {
+                    const colorClass = h.profit >= 0 ? 'win' : 'loss';
+                    const sign = h.profit >= 0 ? '+' : '';
+                    list.innerHTML += `
+                        <div class="history-item">
+                            <span>${h.game}</span>
+                            <span class="${colorClass}">${sign}${h.profit}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // --- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАПУСКЕ ---
+        document.getElementById('global-balance').innerText = balance;
+        // Запускаем инициализацию игры сразу, но она будет скрыта
+        initGame();
+
+        
+        // ==========================================
+        //         MINER GAME LOGIC (INTEGRATED)
+        // ==========================================
+        
+        // Генераторы SVG
+        function getPickaxeSVG(headColor) { return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='${encodeURIComponent(headColor)}' d='M8 1h3v1h1v1h1v1h1v2h-1v-1h-1v-1h-1v-1H8v1H7v1H6v1H5v-2h1v-1h1v-1h1zm-3 4h1v1h1v1H6v1H5v-1H4v-1h1z'/><path fill='%235d4037' d='M6 6h1v1H6zM5 7h1v1H5zM4 8h1v1H4zM3 9h1v1H3zM2 10h1v1H2zM1 11h1v2h2v-1h-1v-1h-1z'/></svg>`; }
+        function getTntSVG() { return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='2' width='12' height='12' fill='%23d32f2f'/><rect x='3' y='2' width='3' height='12' fill='%23e57373' opacity='0.5'/><rect x='8' y='2' width='3' height='12' fill='%23e57373' opacity='0.5'/><text x='8' y='11' font-family='monospace' font-size='6' fill='white' text-anchor='middle'>TNT</text><rect x='6' y='1' width='4' height='1' fill='gray'/></svg>`; }
+
+        const IMAGES = { wood: getPickaxeSVG('#8d6e63'), stone: getPickaxeSVG('#9e9e9e'), iron: getPickaxeSVG('#ffffff'), diamond: getPickaxeSVG('#00e5ff'), tnt: getTntSVG() };
         const CONFIG = {
-            spinCost: 100,
-            cols: 5,
-            tools: [
-                { id: 'wood', dmg: 1, chance: 40, img: IMAGES.wood },
-                { id: 'stone', dmg: 2, chance: 30, img: IMAGES.stone },
-                { id: 'iron', dmg: 5, chance: 15, img: IMAGES.iron },
-                { id: 'diamond', dmg: 20, chance: 5, img: IMAGES.diamond },
-                { id: 'tnt', dmg: 500, chance: 1, img: IMAGES.tnt },
-                { id: 'empty', dmg: 0, chance: 50, img: null }
-            ],
-            blocks: [
-                { type: 'b-dirt', hp: 5 },
-                { type: 'b-stone', hp: 15 },
-                { type: 'b-iron', hp: 30 },
-                { type: 'b-gold', hp: 50 },
-                { type: 'b-diamond', hp: 100 },
-                { type: 'b-obsidian', hp: 200 }
-            ]
+            spinCost: 100, cols: 5,
+            tools: [ { id: 'wood', dmg: 1, chance: 40, img: IMAGES.wood }, { id: 'stone', dmg: 2, chance: 30, img: IMAGES.stone }, { id: 'iron', dmg: 5, chance: 15, img: IMAGES.iron }, { id: 'diamond', dmg: 20, chance: 5, img: IMAGES.diamond }, { id: 'tnt', dmg: 500, chance: 1, img: IMAGES.tnt }, { id: 'empty', dmg: 0, chance: 50, img: null } ],
+            blocks: [ { type: 'b-dirt', hp: 5 }, { type: 'b-stone', hp: 15 }, { type: 'b-iron', hp: 30 }, { type: 'b-gold', hp: 50 }, { type: 'b-diamond', hp: 100 }, { type: 'b-obsidian', hp: 200 } ]
         };
 
-        let balance = parseInt(localStorage.getItem('minercraft_v3')) || 3000;
         let columns = [];
         let isSpinning = false;
 
-        function init() {
-            renderBalance();
+        function initGame() {
             createSlots();
-            
             try {
-                let saved = localStorage.getItem('minercraft_v3_cols');
+                let saved = localStorage.getItem('hub_miner_cols');
                 if(saved) columns = JSON.parse(saved);
                 else throw "reset";
             } catch {
@@ -268,11 +371,7 @@
             for(let i=0; i<count; i++) {
                 let r = Math.random();
                 let b = CONFIG.blocks[0];
-                if(r>0.5) b = CONFIG.blocks[1];
-                if(r>0.75) b = CONFIG.blocks[2];
-                if(r>0.85) b = CONFIG.blocks[3];
-                if(r>0.95) b = CONFIG.blocks[4];
-                if(r>0.98) b = CONFIG.blocks[5];
+                if(r>0.5) b = CONFIG.blocks[1]; if(r>0.75) b = CONFIG.blocks[2]; if(r>0.85) b = CONFIG.blocks[3]; if(r>0.95) b = CONFIG.blocks[4]; if(r>0.98) b = CONFIG.blocks[5];
                 stack.push({...b, max: b.hp});
             }
             return stack;
@@ -284,47 +383,39 @@
             for(let i=0; i<15; i++) grid.innerHTML += `<div class="slot" id="slot-${i}"></div>`;
         }
 
-        function renderBalance() {
-            document.getElementById('balance').innerText = balance;
-            localStorage.setItem('minercraft_v3', balance);
-        }
-
         function renderField() {
             const cont = document.getElementById('mining-cols');
             cont.innerHTML = '';
             for(let c=0; c<CONFIG.cols; c++) {
                 let colDiv = document.createElement('div');
-                colDiv.className = 'column';
-                colDiv.id = `col-${c}`;
+                colDiv.className = 'column'; colDiv.id = `col-${c}`;
                 
                 columns[c].forEach((blk, idx) => {
                     let bDiv = document.createElement('div');
-                    bDiv.className = `block ${blk.type}`;
-                    bDiv.id = `blk-${c}-${idx}`;
+                    bDiv.className = `block ${blk.type}`; bDiv.id = `blk-${c}-${idx}`;
                     let pct = 1 - (blk.hp / blk.max);
                     bDiv.innerHTML = `<span style="z-index:2">${blk.hp}</span><div class="cracks" style="opacity:${pct}"></div>`;
                     colDiv.appendChild(bDiv);
                 });
 
                 let chest = document.createElement('div');
-                chest.className = 'chest-box';
-                chest.id = `chest-${c}`;
+                chest.className = 'chest-box'; chest.id = `chest-${c}`;
                 colDiv.appendChild(chest);
                 cont.appendChild(colDiv);
             }
-            localStorage.setItem('minercraft_v3_cols', JSON.stringify(columns));
+            localStorage.setItem('hub_miner_cols', JSON.stringify(columns));
         }
 
-        // --- GAME LOOP ---
-
         async function spin() {
-            if(isSpinning || balance < CONFIG.spinCost) return;
+            if(isSpinning) return;
+            if(balance < CONFIG.spinCost) { tg.showAlert("Не хватает монет!"); return; }
+            
             isSpinning = true;
-            balance -= CONFIG.spinCost;
-            renderBalance();
+            updateBalance(-CONFIG.spinCost); // Списываем через глобальную функцию
+            addToHistory("Miner Spin", -CONFIG.spinCost);
+
             tg.HapticFeedback.impactOccurred('medium');
 
-            // 1. Roll slots (visual)
             const slotDivs = document.querySelectorAll('.slot');
             for(let k=0; k<8; k++) {
                 slotDivs.forEach(s => s.style.opacity = Math.random() > 0.5 ? '0.5' : '1');
@@ -332,20 +423,14 @@
             }
             slotDivs.forEach(s => s.style.opacity = '1');
 
-            // 2. Generate result
             let dropResults = [];
             for(let i=0; i<15; i++) {
                 let tool = getDrop();
                 dropResults.push(tool);
                 let slot = document.getElementById(`slot-${i}`);
-                if(tool.img) {
-                    slot.innerHTML = `<img src="${tool.img}">`;
-                } else {
-                    slot.innerHTML = '';
-                }
+                if(tool.img) slot.innerHTML = `<img src="${tool.img}">`; else slot.innerHTML = '';
             }
 
-            // 3. Process drops
             await animateDrops(dropResults);
             isSpinning = false;
         }
@@ -353,24 +438,14 @@
         function getDrop() {
             let total = CONFIG.tools.reduce((a,b)=>a+b.chance,0);
             let r = Math.random() * total;
-            for(let t of CONFIG.tools) {
-                if(r<t.chance) return t;
-                r-=t.chance;
-            }
+            for(let t of CONFIG.tools) { if(r<t.chance) return t; r-=t.chance; }
             return CONFIG.tools.find(t=>t.id==='empty');
         }
 
         async function animateDrops(drops) {
-            // Process by rows from bottom (index 10-14) to top (0-4)
-            // But logic says: items fall into their columns.
             let promises = [];
             for(let col=0; col<CONFIG.cols; col++) {
-                // Get drops for this col
-                let colDrops = [
-                    { tool: drops[10+col], idx: 10+col }, // Row 3
-                    { tool: drops[5+col], idx: 5+col },   // Row 2
-                    { tool: drops[col], idx: col }        // Row 1
-                ];
+                let colDrops = [ { tool: drops[10+col], idx: 10+col }, { tool: drops[5+col], idx: 5+col }, { tool: drops[col], idx: col } ];
                 promises.push(handleCol(col, colDrops));
             }
             await Promise.all(promises);
@@ -379,40 +454,32 @@
 
         async function handleCol(col, items) {
             for(let item of items) {
-                if(!item.tool.img) continue; // Empty
-
+                if(!item.tool.img) continue;
                 let slotEl = document.getElementById(`slot-${item.idx}`);
                 let targetEl = getTarget(col);
-                if(!targetEl) break; // Should not happen usually
+                if(!targetEl) break; 
 
-                // 1. Create flying image
                 let img = document.createElement('img');
-                img.src = item.tool.img;
-                img.className = 'flying-tool';
-                
+                img.src = item.tool.img; img.className = 'flying-tool';
                 let rectStart = slotEl.getBoundingClientRect();
                 let rectEnd = targetEl.getBoundingClientRect();
 
+                // Корректировка позиционирования для летящей кирки
+                // Важно учитывать скролл или позицию внутри screen-game
                 img.style.left = rectStart.left + (rectStart.width/2 - 20) + 'px';
                 img.style.top = rectStart.top + (rectStart.height/2 - 20) + 'px';
                 document.body.appendChild(img);
-
-                // Clear slot
                 slotEl.innerHTML = '';
 
-                // 2. Animate
-                // Force reflow
                 img.getBoundingClientRect();
                 let x = rectEnd.left + (rectEnd.width/2 - 20) - parseFloat(img.style.left);
                 let y = rectEnd.top + (rectEnd.height/2 - 20) - parseFloat(img.style.top);
-                img.style.transform = `translate(${x}px, ${y}px) rotate(-45deg)`; // Rotate like hitting
+                img.style.transform = `translate(${x}px, ${y}px) rotate(-45deg)`;
 
                 await new Promise(r => setTimeout(r, 400));
-                
-                // 3. Hit
                 img.remove();
                 await applyHit(col, item.tool, targetEl);
-                await new Promise(r => setTimeout(r, 100)); // Small delay between hits
+                await new Promise(r => setTimeout(r, 100));
             }
         }
 
@@ -424,55 +491,42 @@
 
         async function applyHit(col, tool, el) {
             let stack = columns[col];
-            if(stack.length === 0) return; // Already chest, ignore hit
-
+            if(stack.length === 0) return;
             let blk = stack[0];
             
-            // Visual
-            el.classList.add('damaged');
-            setTimeout(() => el.classList.remove('damaged'), 100);
+            el.classList.add('damaged'); setTimeout(() => el.classList.remove('damaged'), 100);
             tg.HapticFeedback.impactOccurred('light');
 
-            // Logic
-            if(tool.id === 'tnt') blk.hp = 0;
-            else blk.hp -= tool.dmg;
+            if(tool.id === 'tnt') blk.hp = 0; else blk.hp -= tool.dmg;
 
-            // Update UI
             if(blk.hp > 0) {
                 el.querySelector('span').innerText = blk.hp;
                 el.querySelector('.cracks').style.opacity = 1 - (blk.hp/blk.max);
             } else {
-                // Break
                 stack.shift();
                 el.style.opacity = 0;
-                
-                if(stack.length === 0) {
-                    await openChest(col);
-                }
+                if(stack.length === 0) await openChest(col);
             }
         }
 
         async function openChest(c) {
             let chest = document.getElementById(`chest-${c}`);
             chest.classList.add('open');
-            
             let win = Math.floor(Math.random() * 500) + 50;
-            balance += win;
             
+            updateBalance(win); // Глобальное обновление
+            addToHistory("Miner Win", win);
+
             let float = document.createElement('div');
-            float.className = 'float-text';
-            float.innerText = `+${win}`;
+            float.className = 'float-text'; float.innerText = `+${win}`;
             document.getElementById(`col-${c}`).appendChild(float);
-            
             tg.HapticFeedback.notificationOccurred('success');
-            renderBalance();
 
             await new Promise(r => setTimeout(r, 800));
             columns[c] = genStack();
             renderField();
         }
 
-        init();
     </script>
 </body>
 </html>
