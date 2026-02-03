@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TonPlay Clone</title>
+    <title>TonPlay Clone Fixed</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -18,7 +18,7 @@
         
         body {
             margin: 0; padding: 0;
-            background-color: #0d0d0d; /* Почти черный фон */
+            background-color: #0d0d0d;
             color: #ffffff;
             font-family: 'Inter', sans-serif;
             height: 100vh;
@@ -28,10 +28,8 @@
             user-select: none;
         }
 
-        /* Убираем скроллбары */
         ::-webkit-scrollbar { display: none; }
 
-        /* --- ЭКРАНЫ --- */
         .screen {
             flex: 1;
             display: none;
@@ -39,243 +37,108 @@
             width: 100%;
             height: 100%;
             overflow-y: auto;
-            padding-bottom: 80px; /* Место для нижнего меню */
+            position: absolute; /* Важно для перекрытия */
+            top: 0; left: 0;
+            background: #0d0d0d;
         }
-        .screen.active { display: flex; }
-
-        /* ============================ */
-        /* === UI ГЛАВНОГО МЕНЮ === */
-        /* ============================ */
+        .screen.active { display: flex; z-index: 10; }
 
         /* HEADER */
         .tp-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            background-color: #0d0d0d;
-            position: sticky; top: 0; z-index: 50;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background-color: #0d0d0d; position: sticky; top: 0; z-index: 50;
         }
-
-        .logo {
-            font-weight: 800; font-size: 20px; font-style: italic; line-height: 0.9;
-        }
+        .logo { font-weight: 800; font-size: 20px; font-style: italic; line-height: 0.9; }
         .logo span { display: block; font-size: 14px; font-weight: 400; }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .balance-dropdown {
-            background: #1f1f1f;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 14px; font-weight: 600;
-            display: flex; align-items: center; gap: 6px;
-        }
-        
-        .add-btn {
-            background: #007aff;
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; font-weight: 300;
-            color: white;
-            cursor: pointer;
-        }
-
-        .avatar {
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid #333;
-        }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .header-controls { display: flex; align-items: center; gap: 10px; }
+        .balance-dropdown { background: #1f1f1f; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .add-btn { background: #007aff; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 2px solid #333; }
 
         /* BANNERS */
         .banner-section { padding: 0 15px; margin-bottom: 20px; }
-        
-        .hero-banner {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 16px;
-            padding: 20px;
-            height: 160px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .hero-text-yellow {
-            color: #ffeb3b; font-weight: 800; font-size: 32px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            line-height: 1;
-            -webkit-text-stroke: 1px #000;
-        }
+        .hero-banner { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 16px; padding: 20px; height: 160px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+        .hero-text-yellow { color: #ffeb3b; font-weight: 800; font-size: 32px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1; -webkit-text-stroke: 1px #000; }
         .hero-sub { color: white; font-weight: 700; font-size: 16px; text-transform: uppercase; margin-top: 5px; }
-        .hero-duck {
-            position: absolute; right: -10px; bottom: -20px;
-            font-size: 100px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-        }
-
-        .sub-banners {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-            margin-top: 10px;
-        }
-        .sub-card {
-            border-radius: 12px; height: 100px; padding: 10px;
-            position: relative; overflow: hidden;
-            display: flex; align-items: flex-end;
-            justify-content: center; text-align: center;
-        }
-        .orange-card { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); background: linear-gradient(to right, #ff6a00, #ee0979); }
-        .green-card { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); background: linear-gradient(to right, #11998e, #38ef7d); }
-        
+        .hero-duck { position: absolute; right: -10px; bottom: -20px; font-size: 100px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .sub-banners { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .sub-card { border-radius: 12px; height: 100px; padding: 10px; position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; text-align: center; }
+        .orange-card { background: linear-gradient(to right, #ff6a00, #ee0979); }
+        .green-card { background: linear-gradient(to right, #11998e, #38ef7d); }
         .sub-text { font-weight: 800; font-size: 14px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.5); width: 100%; z-index: 2; }
         .sub-emoji { position: absolute; top: 5px; font-size: 40px; z-index: 1; opacity: 0.8; }
 
-        /* FILTERS */
-        .filters-row {
-            display: flex; gap: 10px; padding: 0 15px; margin-bottom: 20px;
-            overflow-x: auto;
-        }
-        .search-btn {
-            background: #1f1f1f; width: 44px; height: 44px;
-            border-radius: 12px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .filter-pill {
-            background: #1f1f1f; padding: 0 20px; height: 44px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 14px; color: #888;
-            white-space: nowrap;
-        }
+        /* FILTERS & GAMES */
+        .filters-row { display: flex; gap: 10px; padding: 0 15px; margin-bottom: 20px; overflow-x: auto; }
+        .filter-pill { background: #1f1f1f; padding: 0 20px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #888; white-space: nowrap; }
         .filter-pill.active { background: #007aff; color: white; }
-        .filter-icon { margin-right: 6px; }
-
-        /* GAMES LIST */
         .section-title { padding: 0 15px; font-weight: 600; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;}
-        .section-title svg { fill: #888; }
-        
-        .games-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px;
-        }
-        .game-item {
-            aspect-ratio: 0.8;
-            background: #1f1f1f;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-        }
-        .game-thumb { width: 100%; height: 100%; object-fit: cover; }
-        .game-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 10px 5px; text-align: center;
-            font-size: 12px; font-weight: 700;
-        }
+        .games-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px; padding-bottom: 100px; }
+        .game-item { aspect-ratio: 0.8; background: #1f1f1f; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; }
+        .game-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 10px 5px; text-align: center; font-size: 12px; font-weight: 700; }
 
         /* BOTTOM NAV */
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%;
-            background: #141414;
-            border-top: 1px solid #222;
-            height: 70px;
-            display: flex; justify-content: space-around; align-items: center;
-            padding-bottom: 10px; /* Safe area */
-            z-index: 100;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 4px; color: #666; font-size: 10px; font-weight: 600;
-            width: 20%;
-        }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #141414; border-top: 1px solid #222; height: 70px; display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #666; font-size: 10px; font-weight: 600; width: 20%; }
         .nav-item.active { color: #007aff; }
         .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
 
         /* ============================ */
-        /* === ЭКРАН ИГРЫ (MINER) === */
+        /* === ИГРА MINER (CSS) === */
         /* ============================ */
         #screen-game {
-            background-color: #87CEEB; /* Небо */
+            background-color: #87CEEB;
             font-family: 'Minecraft', sans-serif;
-            position: relative;
-            z-index: 200; /* Поверх всего */
-            padding-bottom: 0;
+            z-index: 200; /* Самый верхний слой */
         }
 
-        /* Хедер внутри игры */
-        .game-header-bar {
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            display: flex; justify-content: space-between;
-            z-index: 300;
-        }
-        
-        .close-game-btn {
-            background: rgba(0,0,0,0.5);
-            color: white; padding: 8px 16px; border-radius: 20px;
-            font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
-            backdrop-filter: blur(5px);
-            display: flex; align-items: center; gap: 5px;
-            cursor: pointer;
-        }
+        .game-header-bar { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; z-index: 300; }
+        .close-game-btn { background: rgba(0,0,0,0.5); color: white; padding: 8px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 5px; cursor: pointer; }
 
-        /* --- Стили Minecraft Игры (внутренности) --- */
         .ui-top { padding: 10px; display: flex; justify-content: center; z-index: 20; margin-top: 60px; }
         .inventory { background: #C6C6C6; border: 4px solid #373737; padding: 4px; box-shadow: inset 4px 4px #FFF, inset -4px -4px #555; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 2px; width: 100%; max-width: 360px; }
         .slot { aspect-ratio: 1; background: #8B8B8B; border-bottom: 2px solid #FFF; border-right: 2px solid #FFF; border-top: 2px solid #373737; border-left: 2px solid #373737; display: flex; align-items: center; justify-content: center; position: relative; }
         .slot img { width: 80%; height: 80%; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5)); }
+        
         .game-area { flex: 1; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 80px; position: relative; width: 100%; }
         .cols-container { display: grid; grid-template-columns: repeat(5, 1fr); width: 100%; max-width: 360px; height: 100%; gap: 4px; padding: 0 6px; }
         .column { display: flex; flex-direction: column; justify-content: flex-end; position: relative; height: 100%; }
+        
         .block { width: 100%; aspect-ratio: 1; margin-bottom: 2px; position: relative; border: 2px solid rgba(0,0,0,0.2); image-rendering: pixelated; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; text-shadow: 1px 1px 0 #000; }
         .b-dirt { background: #5d4037; } .b-stone { background: #757575; } .b-iron { background: #9e9e9e; } .b-gold { background: #fbc02d; } .b-diamond { background: #00bcd4; border: 2px solid #0097a7; } .b-obsidian { background: #14001c; border: 2px solid #4a148c; }
         .cracks { position: absolute; top:0; left:0; right:0; bottom:0; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.4) 10px, rgba(0,0,0,0.4) 12px); opacity: 0; pointer-events: none; }
+        
         .flying-tool { position: fixed; width: 40px; height: 40px; z-index: 1000; pointer-events: none; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.3)); transition: transform 0.4s cubic-bezier(0.55, 0.055, 0.675, 0.19); }
+        
         .chest-box { width: 100%; aspect-ratio: 1; margin-top: 4px; background: #a16b47; border: 2px solid #3e2723; display: flex; align-items: center; justify-content: center; position: relative; }
         .chest-box::after { content: ''; width: 6px; height: 8px; background: #ccc; border: 1px solid #000; }
         .chest-box.open { background: #ffd700; }
+        
         .ground-controls { position: absolute; bottom: 0; width: 100%; height: 70px; background: #5d4037; border-top: 10px solid #589c28; display: flex; align-items: center; justify-content: center; z-index: 50; cursor: pointer; box-shadow: 0 -5px 10px rgba(0,0,0,0.3); font-family: 'Minecraft'; }
         .balance-btn { background: #373737; color: #fff; padding: 10px 40px; border: 3px solid #fff; font-size: 24px; text-shadow: 2px 2px #000; border-radius: 4px; }
+        
         .damaged { animation: blockHit 0.1s; }
         .float-text { position: absolute; width: 100%; text-align: center; bottom: 100%; font-weight: bold; font-size: 18px; color: #FFD700; text-shadow: 2px 2px 0 #000; animation: floatText 1s forwards; pointer-events: none; z-index: 100; }
+
         @keyframes blockHit { 0% { transform: scale(1); filter: none; } 50% { transform: scale(0.95); filter: brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg); } 100% { transform: scale(1); filter: none; } }
         @keyframes floatText { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <!-- 1. ГЛАВНОЕ МЕНЮ (LOBBY) -->
+    <!-- LOBBY SCREEN -->
     <div id="screen-menu" class="screen active">
-        
-        <!-- Header -->
         <div class="tp-header">
             <div class="logo">Ton<br><span>play</span></div>
             <div class="header-controls">
                 <div class="balance-dropdown">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#28a745"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                    <span id="lobby-balance">5,87₽</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#aaa"><path d="M7 10l5 5 5-5z"/></svg>
+                    <span id="lobby-balance">5870₽</span>
                 </div>
                 <div class="add-btn">+</div>
-                <div class="avatar">
-                    <!-- Заглушка аватарки (как на скрине) -->
-                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="background:#f1c40f;">
-                         <circle cx="12" cy="12" r="10" fill="#f1c40f"/>
-                         <path d="M7 14s2 3 5 3 5-3 5-3" stroke="#000" stroke-width="2" fill="none"/>
-                         <rect x="7" y="9" width="4" height="2" fill="#000"/><rect x="13" y="9" width="4" height="2" fill="#000"/>
-                         <path d="M4 10h16" stroke="#000" stroke-width="2" stroke-dasharray="2,2"/>
-                    </svg>
-                </div>
+                <div class="avatar"><div style="width:100%;height:100%;background:#f1c40f;"></div></div>
             </div>
         </div>
 
-        <!-- Banners -->
         <div class="banner-section">
             <div class="hero-banner">
                 <div class="hero-text-yellow">375%</div>
@@ -283,89 +146,48 @@
                 <div class="hero-sub">БОНУС НА ДЕПОЗИТ</div>
                 <div class="hero-duck">🦆</div>
             </div>
-            
             <div class="sub-banners">
-                <div class="sub-card orange-card">
-                    <div class="sub-emoji">🤑</div>
-                    <div class="sub-text">CASHBACK</div>
-                </div>
-                <div class="sub-card green-card">
-                    <div class="sub-emoji">🚀</div>
-                    <div class="sub-text">БОНУС ДО 7%</div>
-                </div>
+                <div class="sub-card orange-card"><div class="sub-emoji">🤑</div><div class="sub-text">CASHBACK</div></div>
+                <div class="sub-card green-card"><div class="sub-emoji">🚀</div><div class="sub-text">БОНУС ДО 7%</div></div>
             </div>
         </div>
 
-        <!-- Filters -->
         <div class="filters-row">
-            <div class="search-btn">
-                <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
-            <div class="filter-pill active">
-                <svg class="filter-icon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                Все игры
-            </div>
-            <div class="filter-pill">🍒 Слоты</div>
-            <div class="filter-pill">📺 Live</div>
+            <div class="filter-pill active">Все игры</div>
+            <div class="filter-pill">Слоты</div>
+            <div class="filter-pill">Live</div>
         </div>
 
-        <!-- Games Grid -->
-        <div class="section-title">
-            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-            История игр
-        </div>
-
+        <div class="section-title">История игр</div>
         <div class="games-grid">
-            <!-- MINER (Активная) -->
+            <!-- CLICK TO OPEN GAME -->
             <div class="game-item" onclick="openGame()">
-                <!-- Эмуляция картинки игры -->
                 <div style="width:100%; height:100%; background: #6eb1ff; display:flex; align-items:center; justify-content:center; font-size:40px;">⛏️</div>
                 <div class="game-overlay">MINER</div>
             </div>
-
             <div class="game-item">
                 <div style="width:100%; height:100%; background: #444; display:flex; align-items:center; justify-content:center; font-size:40px;">🎰</div>
                 <div class="game-overlay">SLOTS</div>
             </div>
-
             <div class="game-item">
                 <div style="width:100%; height:100%; background: #333; display:flex; align-items:center; justify-content:center; font-size:40px;">🎲</div>
                 <div class="game-overlay">DICE</div>
             </div>
         </div>
 
-        <!-- Bottom Nav -->
         <div class="bottom-nav">
-            <div class="nav-item">
-                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                Касса
-            </div>
-            <div class="nav-item">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                Спорт
-            </div>
-            <div class="nav-item">
-                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>
-                Бонусы
-            </div>
-            <div class="nav-item active">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-2h2v2zm0-4H7v-2h2v2zm0-4H7V7h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>
-                Казино
-            </div>
-            <div class="nav-item">
-                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-                Меню
-            </div>
+            <div class="nav-item">Касса</div>
+            <div class="nav-item">Спорт</div>
+            <div class="nav-item">Бонусы</div>
+            <div class="nav-item active">Казино</div>
+            <div class="nav-item">Меню</div>
         </div>
     </div>
 
-    <!-- 2. ЭКРАН ИГРЫ MINER -->
+    <!-- GAME SCREEN -->
     <div id="screen-game" class="screen">
         <div class="game-header-bar">
-            <div class="close-game-btn" onclick="closeGame()">
-                <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                Закрыть
-            </div>
+            <div class="close-game-btn" onclick="closeGame()">Закрыть</div>
         </div>
 
         <div class="ui-top">
@@ -377,9 +199,7 @@
         </div>
 
         <div class="ground-controls" onclick="spin()">
-            <div class="balance-btn">
-                SPIN (100)
-            </div>
+            <div class="balance-btn">SPIN (100)</div>
         </div>
     </div>
 
@@ -388,29 +208,27 @@
         tg.expand();
         tg.enableClosingConfirmation();
 
-        // --- GLOBAL BALANCE ---
-        let balance = parseInt(localStorage.getItem('tp_balance')) || 5870;
+        // --- GLOBAL STATE ---
+        // Используем новые ключи (_v2), чтобы сбросить старые данные, из-за которых игра ломалась
+        let balance = parseInt(localStorage.getItem('tp_balance_v2')) || 5000;
         
         function updateBalance(diff) {
             balance += diff;
-            localStorage.setItem('tp_balance', balance);
-            renderBalance();
-        }
-
-        function renderBalance() {
-            // Форматирование как рубли или доллары
+            localStorage.setItem('tp_balance_v2', balance);
             document.getElementById('lobby-balance').innerText = balance + "₽";
         }
-        
-        // Init
-        renderBalance();
-        initGame(); // Запускаем движок игры сразу
+        document.getElementById('lobby-balance').innerText = balance + "₽";
 
         // --- NAVIGATION ---
         function openGame() {
             document.getElementById('screen-menu').classList.remove('active');
             document.getElementById('screen-game').classList.add('active');
             tg.BackButton.show();
+            // Принудительная перерисовка при открытии
+            setTimeout(() => {
+                createSlots();
+                renderField();
+            }, 50);
         }
 
         function closeGame() {
@@ -418,12 +236,10 @@
             document.getElementById('screen-menu').classList.add('active');
             tg.BackButton.hide();
         }
-
         tg.BackButton.onClick(closeGame);
 
-
         // ==========================================
-        //         MINER GAME LOGIC
+        //         GAME LOGIC
         // ==========================================
         
         function getPickaxeSVG(c) { return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='${encodeURIComponent(c)}' d='M8 1h3v1h1v1h1v1h1v2h-1v-1h-1v-1h-1v-1H8v1H7v1H6v1H5v-2h1v-1h1v-1h1zm-3 4h1v1h1v1H6v1H5v-1H4v-1h1z'/><path fill='%235d4037' d='M6 6h1v1H6zM5 7h1v1H5zM4 8h1v1H4zM3 9h1v1H3zM2 10h1v1H2zM1 11h1v2h2v-1h-1v-1h-1z'/></svg>`; }
@@ -441,11 +257,15 @@
 
         function initGame() {
             createSlots();
+            // Сброс старых данных для предотвращения ошибок
             try {
-                let saved = localStorage.getItem('tp_miner_cols');
+                let saved = localStorage.getItem('tp_miner_cols_v2');
                 if(saved) columns = JSON.parse(saved);
                 else throw "reset";
+                // Проверка целостности данных
+                if (!Array.isArray(columns) || columns.length !== 5) throw "bad data";
             } catch {
+                columns = [];
                 for(let i=0; i<CONFIG.cols; i++) columns.push(genStack());
             }
             renderField();
@@ -465,31 +285,35 @@
 
         function createSlots() {
             const grid = document.getElementById('slots');
+            if(!grid) return;
             grid.innerHTML = '';
             for(let i=0; i<15; i++) grid.innerHTML += `<div class="slot" id="slot-${i}"></div>`;
         }
 
         function renderField() {
             const cont = document.getElementById('mining-cols');
+            if(!cont) return;
             cont.innerHTML = '';
             for(let c=0; c<CONFIG.cols; c++) {
                 let colDiv = document.createElement('div');
                 colDiv.className = 'column'; colDiv.id = `col-${c}`;
                 
-                columns[c].forEach((blk, idx) => {
-                    let bDiv = document.createElement('div');
-                    bDiv.className = `block ${blk.type}`; bDiv.id = `blk-${c}-${idx}`;
-                    let pct = 1 - (blk.hp / blk.max);
-                    bDiv.innerHTML = `<span style="z-index:2">${blk.hp}</span><div class="cracks" style="opacity:${pct}"></div>`;
-                    colDiv.appendChild(bDiv);
-                });
+                if(columns[c]) {
+                    columns[c].forEach((blk, idx) => {
+                        let bDiv = document.createElement('div');
+                        bDiv.className = `block ${blk.type}`; bDiv.id = `blk-${c}-${idx}`;
+                        let pct = 1 - (blk.hp / blk.max);
+                        bDiv.innerHTML = `<span style="z-index:2">${blk.hp}</span><div class="cracks" style="opacity:${pct}"></div>`;
+                        colDiv.appendChild(bDiv);
+                    });
+                }
 
                 let chest = document.createElement('div');
                 chest.className = 'chest-box'; chest.id = `chest-${c}`;
                 colDiv.appendChild(chest);
                 cont.appendChild(colDiv);
             }
-            localStorage.setItem('tp_miner_cols', JSON.stringify(columns));
+            localStorage.setItem('tp_miner_cols_v2', JSON.stringify(columns));
         }
 
         async function spin() {
@@ -501,7 +325,7 @@
             tg.HapticFeedback.impactOccurred('medium');
 
             const slotDivs = document.querySelectorAll('.slot');
-            for(let k=0; k<8; k++) {
+            for(let k=0; k<6; k++) {
                 slotDivs.forEach(s => s.style.opacity = Math.random() > 0.5 ? '0.5' : '1');
                 await new Promise(r => setTimeout(r, 60));
             }
@@ -553,7 +377,9 @@
                 document.body.appendChild(img);
                 slotEl.innerHTML = '';
 
+                // Force layout update
                 img.getBoundingClientRect();
+
                 let x = rectEnd.left + (rectEnd.width/2 - 20) - parseFloat(img.style.left);
                 let y = rectEnd.top + (rectEnd.height/2 - 20) - parseFloat(img.style.top);
                 img.style.transform = `translate(${x}px, ${y}px) rotate(-45deg)`;
@@ -567,13 +393,13 @@
 
         function getTarget(col) {
             let stack = columns[col];
-            if(stack.length > 0) return document.getElementById(`blk-${col}-0`);
+            if(stack && stack.length > 0) return document.getElementById(`blk-${col}-0`);
             return document.getElementById(`chest-${col}`);
         }
 
         async function applyHit(col, tool, el) {
             let stack = columns[col];
-            if(stack.length === 0) return;
+            if(!stack || stack.length === 0) return;
             let blk = stack[0];
             
             el.classList.add('damaged'); setTimeout(() => el.classList.remove('damaged'), 100);
@@ -606,6 +432,9 @@
             columns[c] = genStack();
             renderField();
         }
+
+        // Init game engine
+        initGame();
     </script>
 </body>
 </html>
