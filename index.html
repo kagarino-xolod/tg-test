@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Games App</title>
+    <title>TonPlay Clone</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* --- ШРИФТ ДЛЯ ИГРЫ (Подключаем, но не применяем ко всему body) --- */
+        /* --- ШРИФТЫ --- */
         @font-face {
             font-family: 'Minecraft';
             src: url('https://cdn.jsdelivr.net/gh/South-Paw/typeface-minecraft/dist/Minecraft.woff2') format('woff2');
         }
 
-        /* --- ГЛОБАЛЬНЫЕ СТИЛИ (Современный дизайн) --- */
+        /* --- ГЛОБАЛЬНЫЕ СТИЛИ --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+        
         body {
             margin: 0; padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; /* Обычный шрифт */
-            background-color: #0f0f0f; /* Глубокий черный */
+            background-color: #0d0d0d; /* Почти черный фон */
             color: #ffffff;
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -28,43 +28,10 @@
             user-select: none;
         }
 
-        /* --- HEADER (Меню) --- */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #333;
-            z-index: 50;
-        }
+        /* Убираем скроллбары */
+        ::-webkit-scrollbar { display: none; }
 
-        .balance-pill {
-            background: #1e1e1e;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            color: #4caf50; /* Зеленый финансовый */
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #333;
-        }
-
-        .profile-icon {
-            width: 40px; height: 40px;
-            background: #333;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .profile-icon:active { background: #555; }
-
-        /* --- SCREENS (Экраны) --- */
+        /* --- ЭКРАНЫ --- */
         .screen {
             flex: 1;
             display: none;
@@ -72,124 +39,193 @@
             width: 100%;
             height: 100%;
             overflow-y: auto;
+            padding-bottom: 80px; /* Место для нижнего меню */
         }
         .screen.active { display: flex; }
 
-        /* --- МЕНЮ ИГР (Сетка) --- */
-        .menu-container {
-            padding: 20px;
+        /* ============================ */
+        /* === UI ГЛАВНОГО МЕНЮ === */
+        /* ============================ */
+
+        /* HEADER */
+        .tp-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #0d0d0d;
+            position: sticky; top: 0; z-index: 50;
         }
+
+        .logo {
+            font-weight: 800; font-size: 20px; font-style: italic; line-height: 0.9;
+        }
+        .logo span { display: block; font-size: 14px; font-weight: 400; }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .balance-dropdown {
+            background: #1f1f1f;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+        }
+        
+        .add-btn {
+            background: #007aff;
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 300;
+            color: white;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* BANNERS */
+        .banner-section { padding: 0 15px; margin-bottom: 20px; }
+        
+        .hero-banner {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 16px;
+            padding: 20px;
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .hero-text-yellow {
+            color: #ffeb3b; font-weight: 800; font-size: 32px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            line-height: 1;
+            -webkit-text-stroke: 1px #000;
+        }
+        .hero-sub { color: white; font-weight: 700; font-size: 16px; text-transform: uppercase; margin-top: 5px; }
+        .hero-duck {
+            position: absolute; right: -10px; bottom: -20px;
+            font-size: 100px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .sub-banners {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            margin-top: 10px;
+        }
+        .sub-card {
+            border-radius: 12px; height: 100px; padding: 10px;
+            position: relative; overflow: hidden;
+            display: flex; align-items: flex-end;
+            justify-content: center; text-align: center;
+        }
+        .orange-card { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); background: linear-gradient(to right, #ff6a00, #ee0979); }
+        .green-card { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); background: linear-gradient(to right, #11998e, #38ef7d); }
+        
+        .sub-text { font-weight: 800; font-size: 14px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.5); width: 100%; z-index: 2; }
+        .sub-emoji { position: absolute; top: 5px; font-size: 40px; z-index: 1; opacity: 0.8; }
+
+        /* FILTERS */
+        .filters-row {
+            display: flex; gap: 10px; padding: 0 15px; margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        .search-btn {
+            background: #1f1f1f; width: 44px; height: 44px;
+            border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .filter-pill {
+            background: #1f1f1f; padding: 0 20px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px; color: #888;
+            white-space: nowrap;
+        }
+        .filter-pill.active { background: #007aff; color: white; }
+        .filter-icon { margin-right: 6px; }
+
+        /* GAMES LIST */
+        .section-title { padding: 0 15px; font-weight: 600; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;}
+        .section-title svg { fill: #888; }
         
         .games-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px;
         }
-
-        .game-card {
-            background: #1e1e1e;
-            border-radius: 16px;
+        .game-item {
+            aspect-ratio: 0.8;
+            background: #1f1f1f;
+            border-radius: 12px;
             overflow: hidden;
-            aspect-ratio: 1;
             position: relative;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.2s;
-            border: 1px solid #333;
         }
-        
-        .game-card:active { transform: scale(0.98); }
-
-        .game-card-img {
-            width: 100%; height: 70%;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center; justify-content: center;
-            font-size: 40px;
-        }
-        
-        .game-card-info {
-            height: 30%;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            background: #252525;
+        .game-thumb { width: 100%; height: 100%; object-fit: cover; }
+        .game-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 10px 5px; text-align: center;
+            font-size: 12px; font-weight: 700;
         }
 
-        /* Стили карточки Miner */
-        .miner-card .game-card-img {
-            background: linear-gradient(135deg, #6eb1ff, #4a90e2);
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%;
+            background: #141414;
+            border-top: 1px solid #222;
+            height: 70px;
+            display: flex; justify-content: space-around; align-items: center;
+            padding-bottom: 10px; /* Safe area */
+            z-index: 100;
         }
-        
-        /* Стили карточек "Скоро" */
-        .coming-soon { opacity: 0.6; filter: grayscale(1); pointer-events: none; }
-        .coming-soon .game-card-info::after { content: 'SOON'; font-size: 10px; background: #ff5252; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; color: #666; font-size: 10px; font-weight: 600;
+            width: 20%;
+        }
+        .nav-item.active { color: #007aff; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
 
-
-        /* --- ПРОФИЛЬ (Современный стиль) --- */
-        .profile-view {
-            padding: 20px;
-            align-items: center;
-        }
-        
-        .user-avatar-large {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; font-weight: bold;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        
-        .stats-box {
-            background: #1e1e1e;
-            width: 100%;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-        
-        .history-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #333;
-            font-size: 14px;
-        }
-        .history-row:last-child { border-bottom: none; }
-        
-        .profit-pos { color: #4caf50; }
-        .profit-neg { color: #ff5252; }
-
-
-        /* ========================================= */
-        /* === ВНУТРЕННОСТИ ИГРЫ (Minecraft Style) === */
-        /* ========================================= */
-        
+        /* ============================ */
+        /* === ЭКРАН ИГРЫ (MINER) === */
+        /* ============================ */
         #screen-game {
-            background-color: #87CEEB;
-            font-family: 'Minecraft', sans-serif; /* Локальный шрифт */
+            background-color: #87CEEB; /* Небо */
+            font-family: 'Minecraft', sans-serif;
             position: relative;
+            z-index: 200; /* Поверх всего */
+            padding-bottom: 0;
         }
 
-        /* Кнопка "Домой" внутри игры */
-        .ingame-menu-btn {
-            position: absolute;
-            top: 15px; left: 15px;
-            width: 40px; height: 40px;
-            background: #eee;
-            border: 2px solid #fff;
-            box-shadow: 2px 2px 0 #000;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 100;
-            font-family: sans-serif; font-size: 20px; font-weight: bold; color: #333;
+        /* Хедер внутри игры */
+        .game-header-bar {
+            position: absolute; top: 10px; left: 10px; right: 10px;
+            display: flex; justify-content: space-between;
+            z-index: 300;
+        }
+        
+        .close-game-btn {
+            background: rgba(0,0,0,0.5);
+            color: white; padding: 8px 16px; border-radius: 20px;
+            font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; gap: 5px;
+            cursor: pointer;
         }
 
-        /* Классы игры (скопированы с прошлого раза) */
+        /* --- Стили Minecraft Игры (внутренности) --- */
         .ui-top { padding: 10px; display: flex; justify-content: center; z-index: 20; margin-top: 60px; }
         .inventory { background: #C6C6C6; border: 4px solid #373737; padding: 4px; box-shadow: inset 4px 4px #FFF, inset -4px -4px #555; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 2px; width: 100%; max-width: 360px; }
         .slot { aspect-ratio: 1; background: #8B8B8B; border-bottom: 2px solid #FFF; border-right: 2px solid #FFF; border-top: 2px solid #373737; border-left: 2px solid #373737; display: flex; align-items: center; justify-content: center; position: relative; }
@@ -208,80 +244,130 @@
         .balance-btn { background: #373737; color: #fff; padding: 10px 40px; border: 3px solid #fff; font-size: 24px; text-shadow: 2px 2px #000; border-radius: 4px; }
         .damaged { animation: blockHit 0.1s; }
         .float-text { position: absolute; width: 100%; text-align: center; bottom: 100%; font-weight: bold; font-size: 18px; color: #FFD700; text-shadow: 2px 2px 0 #000; animation: floatText 1s forwards; pointer-events: none; z-index: 100; }
-
         @keyframes blockHit { 0% { transform: scale(1); filter: none; } 50% { transform: scale(0.95); filter: brightness(1.5) sepia(1) saturate(5) hue-rotate(-50deg); } 100% { transform: scale(1); filter: none; } }
         @keyframes floatText { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
-
     </style>
 </head>
 <body>
 
-    <!-- 1. ЭКРАН ГЛАВНОГО МЕНЮ -->
+    <!-- 1. ГЛАВНОЕ МЕНЮ (LOBBY) -->
     <div id="screen-menu" class="screen active">
-        <!-- Шапка -->
-        <div class="app-header">
-            <div class="balance-pill">
-                $ <span id="global-balance">0</span>
-            </div>
-            <div class="profile-icon" onclick="navTo('profile')">
-                <!-- SVG User Icon -->
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-            </div>
-        </div>
-
-        <div class="menu-container">
-            <h2 style="margin-top: 0;">Play</h2>
-            <div class="games-grid">
-                <!-- Игра MINER -->
-                <div class="game-card miner-card" onclick="navTo('game')">
-                    <div class="game-card-img">⛏️</div>
-                    <div class="game-card-info">Minecraft Miner</div>
-                </div>
-
-                <!-- Другие игры -->
-                <div class="game-card coming-soon">
-                    <div class="game-card-img" style="background:#333;">🍒</div>
-                    <div class="game-card-info">Slots</div>
-                </div>
-
-                <div class="game-card coming-soon">
-                    <div class="game-card-img" style="background:#333;">🚀</div>
-                    <div class="game-card-info">Crash</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. ЭКРАН ПРОФИЛЯ -->
-    <div id="screen-profile" class="screen">
-        <div class="app-header">
-            <div style="font-weight: bold; font-size: 18px;">Profile</div>
-            <div onclick="navTo('menu')" style="color: #888; cursor: pointer;">Close</div>
-        </div>
         
-        <div class="profile-view">
-            <div class="user-avatar-large" id="avatar-letter">U</div>
-            <h2 id="profile-name" style="margin: 0;">User</h2>
-            <div id="profile-id" style="color: #666; font-size: 13px;">ID: 123456</div>
-
-            <div class="stats-box">
-                <div style="color: #888; font-size: 12px; margin-bottom: 10px; text-transform: uppercase;">Recent History</div>
-                <div id="history-list">
-                    <!-- JS fills this -->
+        <!-- Header -->
+        <div class="tp-header">
+            <div class="logo">Ton<br><span>play</span></div>
+            <div class="header-controls">
+                <div class="balance-dropdown">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#28a745"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                    <span id="lobby-balance">5,87₽</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#aaa"><path d="M7 10l5 5 5-5z"/></svg>
                 </div>
+                <div class="add-btn">+</div>
+                <div class="avatar">
+                    <!-- Заглушка аватарки (как на скрине) -->
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="background:#f1c40f;">
+                         <circle cx="12" cy="12" r="10" fill="#f1c40f"/>
+                         <path d="M7 14s2 3 5 3 5-3 5-3" stroke="#000" stroke-width="2" fill="none"/>
+                         <rect x="7" y="9" width="4" height="2" fill="#000"/><rect x="13" y="9" width="4" height="2" fill="#000"/>
+                         <path d="M4 10h16" stroke="#000" stroke-width="2" stroke-dasharray="2,2"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banners -->
+        <div class="banner-section">
+            <div class="hero-banner">
+                <div class="hero-text-yellow">375%</div>
+                <div class="hero-text-yellow">+200FS</div>
+                <div class="hero-sub">БОНУС НА ДЕПОЗИТ</div>
+                <div class="hero-duck">🦆</div>
+            </div>
+            
+            <div class="sub-banners">
+                <div class="sub-card orange-card">
+                    <div class="sub-emoji">🤑</div>
+                    <div class="sub-text">CASHBACK</div>
+                </div>
+                <div class="sub-card green-card">
+                    <div class="sub-emoji">🚀</div>
+                    <div class="sub-text">БОНУС ДО 7%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-row">
+            <div class="search-btn">
+                <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <div class="filter-pill active">
+                <svg class="filter-icon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Все игры
+            </div>
+            <div class="filter-pill">🍒 Слоты</div>
+            <div class="filter-pill">📺 Live</div>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            История игр
+        </div>
+
+        <div class="games-grid">
+            <!-- MINER (Активная) -->
+            <div class="game-item" onclick="openGame()">
+                <!-- Эмуляция картинки игры -->
+                <div style="width:100%; height:100%; background: #6eb1ff; display:flex; align-items:center; justify-content:center; font-size:40px;">⛏️</div>
+                <div class="game-overlay">MINER</div>
+            </div>
+
+            <div class="game-item">
+                <div style="width:100%; height:100%; background: #444; display:flex; align-items:center; justify-content:center; font-size:40px;">🎰</div>
+                <div class="game-overlay">SLOTS</div>
+            </div>
+
+            <div class="game-item">
+                <div style="width:100%; height:100%; background: #333; display:flex; align-items:center; justify-content:center; font-size:40px;">🎲</div>
+                <div class="game-overlay">DICE</div>
+            </div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                Касса
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                Спорт
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>
+                Бонусы
+            </div>
+            <div class="nav-item active">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-2h2v2zm0-4H7v-2h2v2zm0-4H7V7h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg>
+                Казино
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+                Меню
             </div>
         </div>
     </div>
 
-    <!-- 3. ЭКРАН ИГРЫ (MINER) -->
+    <!-- 2. ЭКРАН ИГРЫ MINER -->
     <div id="screen-game" class="screen">
-        <!-- Кнопка выхода в меню -->
-        <div class="ingame-menu-btn" onclick="navTo('menu')">🏠</div>
+        <div class="game-header-bar">
+            <div class="close-game-btn" onclick="closeGame()">
+                <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                Закрыть
+            </div>
+        </div>
 
-        <!-- Контейнер игры (стили Minecraft применяются здесь) -->
         <div class="ui-top">
             <div class="inventory" id="slots"></div>
         </div>
@@ -292,7 +378,7 @@
 
         <div class="ground-controls" onclick="spin()">
             <div class="balance-btn">
-                <span id="game-balance-display">SPIN</span>
+                SPIN (100)
             </div>
         </div>
     </div>
@@ -300,68 +386,44 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.enableClosingConfirmation();
 
-        // --- ГЛОБАЛЬНЫЙ БАЛАНС И ИСТОРИЯ ---
-        let balance = parseInt(localStorage.getItem('app_balance')) || 5000;
-        let history = JSON.parse(localStorage.getItem('app_history')) || [];
-
-        function updateBalance(amount) {
-            balance += amount;
-            localStorage.setItem('app_balance', balance);
-            document.getElementById('global-balance').innerText = balance;
+        // --- GLOBAL BALANCE ---
+        let balance = parseInt(localStorage.getItem('tp_balance')) || 5870;
+        
+        function updateBalance(diff) {
+            balance += diff;
+            localStorage.setItem('tp_balance', balance);
+            renderBalance();
         }
 
-        function addHistory(gameName, amount) {
-            history.unshift({ game: gameName, amount: amount, time: new Date() });
-            if (history.length > 10) history.pop();
-            localStorage.setItem('app_history', JSON.stringify(history));
+        function renderBalance() {
+            // Форматирование как рубли или доллары
+            document.getElementById('lobby-balance').innerText = balance + "₽";
+        }
+        
+        // Init
+        renderBalance();
+        initGame(); // Запускаем движок игры сразу
+
+        // --- NAVIGATION ---
+        function openGame() {
+            document.getElementById('screen-menu').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+            tg.BackButton.show();
         }
 
-        // --- НАВИГАЦИЯ ---
-        function navTo(screen) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(`screen-${screen}`).classList.add('active');
-
-            if(screen === 'profile') renderProfile();
-            
-            // Управление кнопкой "Назад" Телеграма
-            if(screen === 'menu') tg.BackButton.hide();
-            else {
-                tg.BackButton.show();
-                tg.BackButton.onClick(() => navTo('menu'));
-            }
+        function closeGame() {
+            document.getElementById('screen-game').classList.remove('active');
+            document.getElementById('screen-menu').classList.add('active');
+            tg.BackButton.hide();
         }
 
-        function renderProfile() {
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const u = tg.initDataUnsafe.user;
-                document.getElementById('profile-name').innerText = u.first_name;
-                document.getElementById('profile-id').innerText = `ID: ${u.id}`;
-                document.getElementById('avatar-letter').innerText = u.first_name[0].toUpperCase();
-            }
+        tg.BackButton.onClick(closeGame);
 
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
-            if(history.length === 0) list.innerHTML = '<div style="color:#555; text-align:center;">No games yet</div>';
-            
-            history.forEach(h => {
-                const color = h.amount >= 0 ? 'profit-pos' : 'profit-neg';
-                const sign = h.amount >= 0 ? '+' : '';
-                list.innerHTML += `
-                    <div class="history-row">
-                        <span>${h.game}</span>
-                        <span class="${color}">${sign}${h.amount}</span>
-                    </div>
-                `;
-            });
-        }
-
-        // Инициализация
-        document.getElementById('global-balance').innerText = balance;
-        initGame(); // Запускаем движок игры в фоне
 
         // ==========================================
-        //         MINER GAME ENGINE
+        //         MINER GAME LOGIC
         // ==========================================
         
         function getPickaxeSVG(c) { return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='${encodeURIComponent(c)}' d='M8 1h3v1h1v1h1v1h1v2h-1v-1h-1v-1h-1v-1H8v1H7v1H6v1H5v-2h1v-1h1v-1h1zm-3 4h1v1h1v1H6v1H5v-1H4v-1h1z'/><path fill='%235d4037' d='M6 6h1v1H6zM5 7h1v1H5zM4 8h1v1H4zM3 9h1v1H3zM2 10h1v1H2zM1 11h1v2h2v-1h-1v-1h-1z'/></svg>`; }
@@ -380,7 +442,7 @@
         function initGame() {
             createSlots();
             try {
-                let saved = localStorage.getItem('app_miner_cols');
+                let saved = localStorage.getItem('tp_miner_cols');
                 if(saved) columns = JSON.parse(saved);
                 else throw "reset";
             } catch {
@@ -427,16 +489,15 @@
                 colDiv.appendChild(chest);
                 cont.appendChild(colDiv);
             }
-            localStorage.setItem('app_miner_cols', JSON.stringify(columns));
+            localStorage.setItem('tp_miner_cols', JSON.stringify(columns));
         }
 
         async function spin() {
             if(isSpinning) return;
-            if(balance < CONFIG.spinCost) { tg.showAlert("Need more money!"); return; }
+            if(balance < CONFIG.spinCost) { tg.showAlert("Пополните баланс!"); return; }
             
             isSpinning = true;
             updateBalance(-CONFIG.spinCost);
-            addHistory("Miner Spin", -CONFIG.spinCost);
             tg.HapticFeedback.impactOccurred('medium');
 
             const slotDivs = document.querySelectorAll('.slot');
@@ -487,7 +548,6 @@
                 let rectStart = slotEl.getBoundingClientRect();
                 let rectEnd = targetEl.getBoundingClientRect();
 
-                // Учитываем, что игра может быть прокручена, но здесь фиксированный лэйаут
                 img.style.left = rectStart.left + (rectStart.width/2 - 20) + 'px';
                 img.style.top = rectStart.top + (rectStart.height/2 - 20) + 'px';
                 document.body.appendChild(img);
@@ -536,7 +596,6 @@
             chest.classList.add('open');
             let win = Math.floor(Math.random() * 500) + 50;
             updateBalance(win);
-            addHistory("Miner Win", win);
 
             let float = document.createElement('div');
             float.className = 'float-text'; float.innerText = `+${win}`;
